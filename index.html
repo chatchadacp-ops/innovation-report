@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>แบบเก็บข้อมูลโครงการ พื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่ 2569</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -161,9 +160,6 @@ input[type=number]{font-family:'IBM Plex Mono',monospace}
 #dashPage{max-width:980px;margin:0 auto;padding:20px 14px 40px}
 .dash-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
 .dash-topbar h2{font-size:18px;font-weight:700;color:var(--navy)}
-.dash-actions{display:flex;gap:8px;flex-wrap:wrap}
-.btn-dl{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:8px 15px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
-.btn-dl:hover{opacity:.88}
 
 /* KPI CARDS */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
@@ -231,21 +227,6 @@ tr:hover td{background:#f5f9ff}
 .mdiv{border:none;border-top:1px solid var(--border);margin:12px 0}
 
 
-/* ADMIN LOGIN MODAL */
-.admin-modal-bg{display:none;position:fixed;inset:0;background:rgba(26,53,87,.5);z-index:600;align-items:center;justify-content:center;padding:20px}
-.admin-modal-bg.open{display:flex}
-.admin-modal{background:#fff;border-radius:12px;width:100%;max-width:340px;overflow:hidden;box-shadow:0 8px 32px rgba(26,53,87,.2)}
-.admin-modal-head{background:linear-gradient(90deg,var(--navy),var(--blue));color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
-.admin-modal-head h3{font-size:15px;font-weight:700}
-.admin-modal-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
-.admin-modal-body{padding:20px}
-.admin-modal-body label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:5px}
-.admin-modal-body input{width:100%;font-family:'Sarabun',sans-serif;font-size:14px;background:var(--light);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;outline:none;margin-bottom:14px;transition:.2s}
-.admin-modal-body input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,168,.12)}
-.admin-modal-err{font-size:12px;color:var(--err);margin-bottom:10px;display:none}
-.admin-modal-err.show{display:block}
-.admin-modal-btn{width:100%;background:linear-gradient(90deg,var(--blue),var(--sky));color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
-.admin-modal-btn:hover{opacity:.9}
 @media(max-width:540px){
   .sec-body{padding:16px 12px 12px}
   .sec-head{padding:13px 14px 11px}
@@ -438,9 +419,7 @@ tr:hover td{background:#f5f9ff}
 <div id="dashPage">
   <div class="dash-topbar">
     <h2>📊 แดชบอร์ดรายงาน — พื้นที่นวัตกรรมการศึกษาเชียงใหม่ 2569</h2>
-    <div class="dash-actions" id="dashActions">
-      <!-- Excel button shown only after admin login -->
-    </div>
+
   </div>
   <!-- KPI -->
   <div class="kpi-grid" id="kpiGrid"></div>
@@ -499,22 +478,6 @@ tr:hover td{background:#f5f9ff}
 
 </div>
 </div><!-- /dashTab -->
-
-<!-- ADMIN LOGIN MODAL -->
-<div class="admin-modal-bg" id="adminModalBg">
-  <div class="admin-modal">
-    <div class="admin-modal-head">
-      <h3>🔑 เข้าสู่ระบบ Admin</h3>
-      <button class="admin-modal-close" id="adminModalClose">×</button>
-    </div>
-    <div class="admin-modal-body">
-      <label>รหัสผ่าน Admin</label>
-      <input type="password" id="adminPinInput" placeholder="ระบุรหัสผ่าน...">
-      <div class="admin-modal-err" id="adminPinErr">รหัสผ่านไม่ถูกต้อง</div>
-      <button class="admin-modal-btn" id="adminPinBtn">ยืนยัน → ดาวน์โหลด Excel</button>
-    </div>
-  </div>
-</div>
 
 <!-- MODAL -->
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
@@ -984,25 +947,6 @@ function showTab(tab) {
 
 // ===== DASHBOARD =====
 function renderDash() {
-  // Render admin action button
-  var actEl = document.getElementById('dashActions');
-  if (actEl) {
-    if (isAdmin) {
-      actEl.innerHTML = '';
-      var xlsBtn = document.createElement('button');
-      xlsBtn.className = 'btn-dl';
-      xlsBtn.textContent = '📥 ดาวน์โหลด Excel (Admin)';
-      xlsBtn.addEventListener('click', function() { exportExcel(); });
-      actEl.appendChild(xlsBtn);
-    } else {
-      actEl.innerHTML = '';
-      var xlsBtn2 = document.createElement('button');
-      xlsBtn2.className = 'btn-dl';
-      xlsBtn2.textContent = '📥 ดาวน์โหลด Excel';
-      xlsBtn2.addEventListener('click', function() { requestExcel(); });
-      actEl.appendChild(xlsBtn2);
-    }
-  }
   const total = records.length;
   const totalBudget = records.reduce((s,r)=>s+r.budget,0);
   const totalPeople = records.reduce((s,r)=>s+r.targetTotal,0);
@@ -1114,73 +1058,9 @@ function openModal(id) {
 function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
 
 
-// ===== EXPORT EXCEL =====
-function exportExcel(){
-  if(!records.length){alert('ยังไม่มีข้อมูลโครงการ');return;}
-  if(typeof XLSX==='undefined'){alert('กำลังโหลด SheetJS กรุณาลองใหม่');return;}
-  const wb=XLSX.utils.book_new();
 
-  // Sheet 1: รายการโครงการ
-  const hdr=['ลำดับ','วันที่ส่ง','ประเภทหน่วยงาน','ชื่อหน่วยงาน','ผู้รับผิดชอบ','โทรศัพท์','ชื่อโครงการ','งบประมาณรวม (บาท)','แหล่งงบประมาณ','รายละเอียดงบแยกแหล่ง','ระยะเวลา','จำนวนยุทธศาสตร์','กลุ่มเป้าหมาย','รายละเอียดกลุ่มเป้าหมาย','จำนวนรวม (คน)','ผลลัพธ์','แผนขยายผล','ข้อเสนอแนะ'];
-  const rows=records.map((r,i)=>[
-    i+1,r.ts,r.orgType,r.orgName,r.contact,r.phone,
-    r.project,r.budget,r.budgetSrcStr,
-    Object.entries(r.budgetBreakdown).map(([k,v])=>`${k}: ${v.toLocaleString()}`).join(' / '),
-    r.period,r.stratCount,r.targetStr,
-    Object.entries(r.targetBreakdown).map(([k,v])=>`${k}: ${v.toLocaleString()}`).join(' / '),
-    r.targetTotal,r.outcome,r.expand,r.suggestion
-  ]);
-  const ws1=XLSX.utils.aoa_to_sheet([hdr,...rows]);
-  ws1['!cols']=[{wch:5},{wch:18},{wch:20},{wch:28},{wch:16},{wch:12},{wch:36},{wch:14},{wch:30},{wch:40},{wch:18},{wch:8},{wch:24},{wch:40},{wch:10},{wch:40},{wch:40},{wch:40}];
-  XLSX.utils.book_append_sheet(wb,ws1,'รายการโครงการ');
 
-  // Sheet 2: สรุปภาพรวม
-  const tot=records.length;
-  const totB=records.reduce((s,r)=>s+r.budget,0);
-  const totP=records.reduce((s,r)=>s+r.targetTotal,0);
-  const orgMap={};records.forEach(r=>{orgMap[r.orgType]=(orgMap[r.orgType]||0)+1;});
-  const bdMap={};records.forEach(r=>Object.entries(r.budgetBreakdown).forEach(([k,v])=>{bdMap[k]=(bdMap[k]||0)+v;}));
-  const tgtMap={};records.forEach(r=>Object.entries(r.targetBreakdown).forEach(([k,v])=>{tgtMap[k]=(tgtMap[k]||0)+v;}));
-  const stMap={};records.forEach(r=>r.strategy.split(' | ').forEach(s=>{if(s)stMap[s]=(stMap[s]||0)+1;}));
-  const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
-
-  const sumRows=[
-    ['รายงานสรุปภาพรวม — พื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่ ปีงบประมาณ พ.ศ. 2569'],
-    ['จัดทำโดย','สำนักงานศึกษาธิการจังหวัดเชียงใหม่'],
-    ['วันที่พิมพ์',today],[],
-    ['สถิติภาพรวม'],
-    ['จำนวนโครงการทั้งหมด',tot,'รายการ'],
-    ['งบประมาณรวม',totB,'บาท'],
-    ['กลุ่มเป้าหมายรวม',totP,'คน'],[],
-    ['จำนวนโครงการตามประเภทหน่วยงาน'],['ประเภทหน่วยงาน','จำนวน','ร้อยละ'],
-    ...Object.entries(orgMap).map(([k,v])=>[k,v,tot?+(v/tot*100).toFixed(1):0]),
-    [],['งบประมาณตามแหล่ง (บาท)'],['แหล่งงบประมาณ','ยอดงบ (บาท)','ร้อยละ'],
-    ...Object.entries(bdMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,totB?+(v/totB*100).toFixed(1):0]),
-    [],['กลุ่มเป้าหมาย'],['กลุ่ม','จำนวน (คน)','ร้อยละ'],
-    ...Object.entries(tgtMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,totP?+(v/totP*100).toFixed(1):0]),
-  ];
-  const ws2=XLSX.utils.aoa_to_sheet(sumRows);
-  ws2['!cols']=[{wch:40},{wch:20},{wch:12}];
-  XLSX.utils.book_append_sheet(wb,ws2,'สรุปภาพรวม');
-
-  // Sheet 3: ยุทธศาสตร์
-  const ws3=XLSX.utils.aoa_to_sheet([
-    ['ยุทธศาสตร์/กลยุทธ์','จำนวนโครงการ','ร้อยละ'],
-    ...Object.entries(stMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,tot?+(v/tot*100).toFixed(1):0])
-  ]);
-  ws3['!cols']=[{wch:60},{wch:14},{wch:10}];
-  XLSX.utils.book_append_sheet(wb,ws3,'ยุทธศาสตร์');
-
-  const d=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
-  XLSX.writeFile(wb,`รายงานนวัตกรรมการศึกษาเชียงใหม่_${d}.xlsx`);
-}
-
-// ===== DEMO DATA =====
-records.push(
-  {id:1001,ts:'20/06/2569 09:12',orgType:'โรงเรียนนำร่อง',orgName:'โรงเรียนวัดพระธาตุดอยสุเทพ',contact:'นางสาวมาลี ใจดี',phone:'0891234567',project:'โครงการพัฒนาทักษะการคิดวิเคราะห์ด้วย STEM',budgetBreakdown:{'งบประมาณต้นสังกัด':100000,'กสศ.':50000},budgetSrcStr:'งบประมาณต้นสังกัด, กสศ.',budget:150000,period:'ไตรมาส 1, ไตรมาส 2',strategy:'1.1 พัฒนานวัตกรรมการศึกษา | 4.1 สนับสนุนเทคโนโลยี | 5.4 วิจัยพัฒนานวัตกรรม',stratCount:3,targetBreakdown:{'ผู้เรียน':280,'ครู':40},targetStr:'ผู้เรียน, ครู',targetTotal:320,outcome:'นักเรียนมีทักษะการคิดเชิงวิทยาศาสตร์เพิ่มขึ้น 30%',expand:'ขยายไปมัธยมปลาย',suggestion:'ควรเพิ่มครูผู้ช่วยวิทยาศาสตร์'},
-  {id:1002,ts:'20/06/2569 10:05',orgType:'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา',orgName:'สพป.เชียงใหม่ เขต 1',contact:'นายสมชาย วงศ์ดี',phone:'0532345678',project:'โครงการลดความเหลื่อมล้ำด้วยเทคโนโลยีการศึกษา',budgetBreakdown:{'งบประมาณต้นสังกัด':200000,'งบประมาณจังหวัด':80000},budgetSrcStr:'งบประมาณต้นสังกัด, งบประมาณจังหวัด',budget:280000,period:'ดำเนินการตลอดปี',strategy:'2.1 เพิ่มโอกาสทางการศึกษา | 2.2 สร้างความเสมอภาค | 4.1 สนับสนุนเทคโนโลยี | 8.2 จัดทำฐานข้อมูลสารสนเทศ',stratCount:4,targetBreakdown:{'ผู้เรียน':900,'ครู':200,'ผู้บริหาร':100},targetStr:'ผู้เรียน, ครู, ผู้บริหาร',targetTotal:1200,outcome:'ผู้เรียนในพื้นที่ห่างไกลเข้าถึงการศึกษาคุณภาพเพิ่มขึ้น 40%',expand:'ขยายสัญญาณอินเทอร์เน็ต',suggestion:'ควรมีระบบติดตามผลเป็นรายบุคคล'},
-  {id:1003,ts:'20/06/2569 13:44',orgType:'โรงเรียนนำร่อง',orgName:'โรงเรียนบ้านแม่ขิ',contact:'นางประภา สุขสันต์',phone:'0819876543',project:'กิจกรรมส่งเสริมทักษะชีวิตและอาชีพ',budgetBreakdown:{'งบประมาณสถานศึกษา':45000,'ระดมทรัพยากรจากชุมชน':30000},budgetSrcStr:'งบประมาณสถานศึกษา, ระดมทรัพยากรจากชุมชน',budget:75000,period:'ไตรมาส 2, ไตรมาส 3',strategy:'3.5 จัดกระบวนการเรียนรู้ | 3.7 ลดอัตราการออกกลางคัน | 7.3 พัฒนาเครือข่ายภาคีหุ้นส่วน',stratCount:3,targetBreakdown:{'ผู้เรียน':120,'ผู้ปกครอง':40,'ชุมชน':20},targetStr:'ผู้เรียน, ผู้ปกครอง, ชุมชน',targetTotal:180,outcome:'อัตราออกกลางคันลดลง มีทักษะอาชีพพื้นฐาน',expand:'จัดตั้งศูนย์เรียนรู้ทักษะอาชีพในชุมชน',suggestion:'ต้องการงบสนับสนุนวัสดุอุปกรณ์'}
-);
+// ===== ไม่มีข้อมูลตัวอย่าง — รอรับข้อมูลจริงจากฟอร์ม =====
 
 // ===== BUILD ORG TYPE (Radio) =====
 function buildOrgList() {
@@ -1319,82 +1199,12 @@ function showSendStatus(status) {
   }
 }
 
-// ===== ADMIN MODAL =====
-var isAdmin = false;
-
-function initAdminModal() {
-  var bg = document.getElementById('adminModalBg');
-  var closeBtn = document.getElementById('adminModalClose');
-  var pinBtn = document.getElementById('adminPinBtn');
-  var pinInput = document.getElementById('adminPinInput');
-
-  closeBtn.addEventListener('click', function() {
-    bg.classList.remove('open');
-    pinInput.value = '';
-    document.getElementById('adminPinErr').classList.remove('show');
-  });
-
-  bg.addEventListener('click', function(e) {
-    if (e.target === bg) {
-      bg.classList.remove('open');
-      pinInput.value = '';
-      document.getElementById('adminPinErr').classList.remove('show');
-    }
-  });
-
-  pinBtn.addEventListener('click', function() { checkAdminPin(); });
-  pinInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') checkAdminPin();
-  });
-}
-
-function checkAdminPin() {
-  var pin = document.getElementById('adminPinInput').value;
-  var errEl = document.getElementById('adminPinErr');
-  if (pin === 'cmpeo2569') {
-    isAdmin = true;
-    document.getElementById('adminModalBg').classList.remove('open');
-    document.getElementById('adminPinInput').value = '';
-    errEl.classList.remove('show');
-    // Show Excel button and update user indicator
-    showExcelBtn();
-    exportExcel();
-  } else {
-    errEl.classList.add('show');
-    document.getElementById('adminPinInput').value = '';
-    document.getElementById('adminPinInput').focus();
-  }
-}
-
-function showExcelBtn() {
-  var c = document.getElementById('dashActions');
-  if (!c) return;
-  c.innerHTML = '<button class="btn-dl" id="xlsBtn">📥 ดาวน์โหลด Excel (Admin)</button>';
-  document.getElementById('xlsBtn').addEventListener('click', function() {
-    exportExcel();
-  });
-}
-
-function requestExcel() {
-  if (isAdmin) {
-    exportExcel();
-  } else {
-    document.getElementById('adminPinInput').value = '';
-    document.getElementById('adminPinErr').classList.remove('show');
-    document.getElementById('adminModalBg').classList.add('open');
-    setTimeout(function() {
-      document.getElementById('adminPinInput').focus();
-    }, 100);
-  }
-}
-
 // ===== INIT =====
 buildOrgList();
 buildBudgetList();
 buildPeriodList();
 buildTargetList();
 buildStrategy();
-initAdminModal();
 
 </script>
 </body>

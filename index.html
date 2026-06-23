@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>แบบเก็บข้อมูลโครงการ พื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่ 2569</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1a3557;--blue:#2563a8;--sky:#3b82c4;--accent:#e8a020;
+  --light:#eef4fb;--white:#fff;--border:#c5d8ee;--text:#1e2e42;
+  --muted:#5a7a9c;--err:#c0392b;--ok:#1a7a4a;--r:10px;
+  --green:#1a7a4a;--orange:#e8a020;
+}
+body{font-family:'Sarabun',sans-serif;background:linear-gradient(160deg,#daeaf8 0%,#f0f6fc 60%,#fff 100%);color:var(--text);min-height:100vh;padding-bottom:60px}
+
+/* NAV */
+.top-nav{background:var(--navy);display:flex;gap:0;position:sticky;top:0;z-index:200}
+.top-nav button{background:none;border:none;color:rgba(255,255,255,.6);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;padding:14px 24px;cursor:pointer;border-bottom:3px solid transparent;transition:.2s}
+.top-nav button.active{color:#fff;border-bottom-color:var(--accent)}
+.top-nav button:hover{color:#fff}
+
+/* HEADER */
+.site-header{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;padding:24px 24px 20px;text-align:center}
+.header-badge{display:inline-block;background:var(--accent);color:var(--navy);font-size:11px;font-weight:700;letter-spacing:.1em;padding:3px 12px;border-radius:20px;margin-bottom:10px}
+.site-header h1{font-size:clamp(15px,2.8vw,20px);font-weight:700;line-height:1.5;max-width:680px;margin:0 auto 5px}
+.site-header .sub{font-size:13px;opacity:.75}
+
+/* PROGRESS */
+.prog-wrap{background:#fff;border-bottom:1px solid var(--border);padding:12px 16px 8px;z-index:100;box-shadow:0 2px 8px rgba(26,53,87,.08)}
+.prog-steps{display:flex;align-items:center;justify-content:center;max-width:680px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+.prog-steps::-webkit-scrollbar{display:none}
+.pstep{display:flex;flex-direction:column;align-items:center;min-width:64px;cursor:pointer}
+.pstep-c{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:#dde8f4;color:var(--muted);transition:.3s;position:relative;z-index:1}
+.pstep.done .pstep-c{background:var(--blue);color:#fff}
+.pstep.active .pstep-c{background:var(--accent);color:#fff;box-shadow:0 0 0 4px rgba(232,160,32,.22)}
+.pstep-l{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap;text-align:center}
+.pstep.done .pstep-l{color:var(--blue)}
+.pstep.active .pstep-l{color:var(--accent);font-weight:600}
+.pstep-line{flex:1;height:2px;background:#dde8f4;margin-bottom:16px;min-width:8px;transition:.3s}
+.pstep-line.done{background:var(--blue)}
+.prog-txt{text-align:center;font-size:11px;color:var(--muted);margin-top:5px}
+
+/* MAIN */
+.main-wrap{max-width:720px;margin:24px auto 0;padding:0 14px}
+.form-card{background:#fff;border-radius:var(--r);box-shadow:0 4px 24px rgba(26,53,87,.10);overflow:hidden}
+.sec-panel{display:none}
+.sec-panel.active{display:block}
+.sec-head{background:linear-gradient(90deg,var(--blue),var(--sky));color:#fff;padding:16px 24px 13px}
+.sec-head .stag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.75;font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
+.sec-head h2{font-size:17px;font-weight:700}
+.sec-head p{font-size:13px;opacity:.85;margin-top:4px;line-height:1.6}
+.sec-body{padding:22px 24px 16px}
+
+/* INTRO */
+.intro-panel{background:#fff;border-radius:var(--r);box-shadow:0 4px 24px rgba(26,53,87,.10);overflow:hidden}
+.intro-head{background:linear-gradient(135deg,var(--navy),var(--blue));padding:22px;color:#fff;text-align:center}
+.intro-head h2{font-size:17px;margin-bottom:4px}
+.intro-body{padding:20px 24px 24px}
+.intro-body p{font-size:14px;line-height:1.85;color:var(--text)}
+.note{background:var(--light);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:10px 14px;margin-top:14px;font-size:13px;color:var(--navy);line-height:1.7}
+.start-btn{display:block;width:100%;background:linear-gradient(90deg,var(--blue),var(--sky));color:#fff;border:none;border-radius:8px;padding:13px;font-family:'Sarabun',sans-serif;font-size:15px;font-weight:600;cursor:pointer;margin-top:18px;transition:.2s}
+.start-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+/* FIELD */
+.field{margin-bottom:20px}
+.field label{display:block;font-size:14px;font-weight:600;color:var(--navy);margin-bottom:6px}
+.req{color:var(--err);margin-left:2px;font-size:13px}
+.qnum{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-right:5px;font-weight:400}
+.hint{font-weight:400;font-size:11.5px;color:var(--muted);margin-left:4px}
+input[type=text],input[type=tel],input[type=number],textarea{
+  width:100%;font-family:'Sarabun',sans-serif;font-size:14px;color:var(--text);
+  background:var(--light);border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 12px;outline:none;transition:.2s;appearance:none
+}
+input:focus,textarea:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,168,.12)}
+input.err-input{border-color:var(--err)!important}
+textarea{resize:vertical;min-height:80px}
+input[type=number]{font-family:'IBM Plex Mono',monospace}
+
+/* PHONE hint */
+.phone-hint{font-size:11.5px;margin-top:4px;display:none}
+.phone-hint.show{display:block}
+.phone-hint.bad{color:var(--err)}
+.phone-hint.good{color:var(--ok)}
+
+/* OPTION ITEMS */
+.opt-list{display:flex;flex-direction:column;gap:6px}
+.opt-item{
+  display:flex;align-items:flex-start;gap:10px;padding:9px 13px;
+  border:1.5px solid var(--border);border-radius:8px;cursor:pointer;
+  transition:.2s;background:var(--light);user-select:none;
+}
+.opt-item:hover{border-color:var(--sky);background:#dff0fb}
+.opt-item.on{border-color:var(--blue);background:#e6f0fa}
+.chk-box{width:20px;height:20px;min-width:20px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.2s;flex-shrink:0;pointer-events:none}
+.opt-item.on .chk-box{border-color:var(--blue);background:var(--blue)}
+.opt-item.on .chk-box::after{content:'✓';color:#fff;font-size:12px;font-weight:700;line-height:1}
+.radio-box{width:20px;height:20px;min-width:20px;border:2px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:.2s;flex-shrink:0;pointer-events:none}
+.opt-item.on .radio-box{border-color:var(--blue)}
+.opt-item.on .radio-box::after{content:'';display:block;width:8px;height:8px;background:var(--blue);border-radius:50%}
+.opt-txt{font-size:13.5px;line-height:1.5;pointer-events:none;flex:1}
+
+/* INLINE INPUT below checkbox */
+.inline-input-wrap{
+  display:none;margin-top:6px;margin-left:30px;
+  background:#fff;border:1.5px solid #b0ccee;border-radius:8px;
+  padding:8px 12px;position:relative;
+}
+.inline-input-wrap.show{display:block}
+.inline-input-wrap label{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px;display:block}
+.inline-input-wrap input{background:#f7faff;border:1.5px solid var(--border);padding:7px 10px;font-size:13px}
+.inline-input-wrap .baht{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* OTHER wrap */
+.other-wrap{margin-top:6px;display:none}
+.other-wrap.show{display:block}
+.other-wrap input{border-style:dashed;background:#fff;font-size:13px}
+
+/* STRATEGY */
+.strat-group{margin-bottom:14px}
+.strat-gh{background:var(--navy);color:#fff;font-size:12px;font-weight:600;padding:8px 12px;border-radius:8px 8px 0 0;line-height:1.5}
+.strat-sub{border:1.5px solid var(--border);border-top:none;border-radius:0 0 8px 8px;padding:5px 7px}
+.strat-sub .opt-item{background:#fff;border-color:#dce8f5}
+.strat-sub .opt-item.on{border-color:var(--blue);background:#e6f0fa}
+.strat-lbl{background:var(--light);border-left:3px solid var(--sky);font-size:12px;font-weight:600;color:var(--blue);padding:5px 10px;margin:5px 0 3px;border-radius:0 5px 5px 0}
+
+/* FIELD ERROR */
+.ferr{display:none;font-size:12px;color:var(--err);margin-top:4px}
+.field.err .ferr{display:block}
+.field.err>input,.field.err>textarea{border-color:var(--err)}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:22px;padding-top:16px;border-top:1px solid var(--border)}
+.btn{flex:1;padding:12px 18px;border-radius:8px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.2s}
+.btn-back{background:var(--light);color:var(--navy);border:1.5px solid var(--border);flex:.5}
+.btn-back:hover{background:#dbe8f4}
+.btn-next{background:linear-gradient(90deg,var(--blue),var(--sky));color:#fff}
+.btn-next:hover{opacity:.9;transform:translateY(-1px)}
+.btn-submit{background:linear-gradient(90deg,#1a7a4a,#28a865);color:#fff}
+.btn-submit:hover{opacity:.9;transform:translateY(-1px)}
+
+/* SUCCESS */
+#successPage{display:none;max-width:720px;margin:36px auto 0;padding:0 14px}
+.suc-card{background:#fff;border-radius:var(--r);box-shadow:0 4px 24px rgba(26,53,87,.10);padding:32px;text-align:center}
+.suc-icon{width:64px;height:64px;background:linear-gradient(135deg,#1a7a4a,#28a865);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:30px;color:#fff}
+.suc-card h2{font-size:19px;color:var(--navy);margin-bottom:8px}
+.suc-card p{font-size:13.5px;color:var(--muted);line-height:1.7}
+.suc-sum{background:var(--light);border-radius:8px;padding:14px 16px;margin:16px 0;text-align:left}
+.suc-sum h3{font-size:13px;color:var(--navy);margin-bottom:8px;font-weight:600}
+.sr{display:flex;gap:6px;margin-bottom:5px;font-size:13px}
+.sl{color:var(--muted);min-width:110px;flex-shrink:0}
+.sv{color:var(--text);font-weight:500}
+.btn-new{display:inline-block;margin-top:12px;padding:10px 24px;background:var(--light);border:1.5px solid var(--border);border-radius:8px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;color:var(--navy);cursor:pointer}
+.btn-new:hover{background:#dbe8f4}
+
+/* ===== DASHBOARD ===== */
+#dashTab{display:none}
+#dashPage{max-width:980px;margin:0 auto;padding:20px 14px 40px}
+.dash-topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.dash-topbar h2{font-size:18px;font-weight:700;color:var(--navy)}
+.dash-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn-dl{background:var(--blue);color:#fff;border:none;border-radius:7px;padding:8px 15px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+.btn-dl:hover{opacity:.88}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.kpi{background:#fff;border-radius:10px;padding:14px 16px;border:1.5px solid var(--border);position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--blue)}
+.kpi.green::before{background:var(--green)}
+.kpi.orange::before{background:var(--orange)}
+.kpi.sky::before{background:var(--sky)}
+.kpi-n{font-size:11px;color:var(--muted);margin-bottom:4px}
+.kpi-v{font-size:24px;font-weight:700;color:var(--navy);font-family:'IBM Plex Mono',monospace;line-height:1}
+.kpi-u{font-size:11px;color:var(--muted);margin-top:3px}
+
+/* CHART GRID */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+@media(max-width:600px){.chart-grid{grid-template-columns:1fr}}
+.chart-box{background:#fff;border-radius:10px;border:1.5px solid var(--border);padding:14px 16px}
+.chart-box.full{grid-column:1/-1}
+.chart-box h3{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.bar-wrap{display:flex;flex-direction:column;gap:7px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-lbl{font-size:11.5px;color:var(--muted);min-width:100px;max-width:140px;text-align:right;flex-shrink:0;line-height:1.3}
+.bar-track{flex:1;background:var(--light);border-radius:4px;height:16px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:.6s;min-width:2px}
+.bf-blue{background:linear-gradient(90deg,var(--blue),var(--sky))}
+.bf-green{background:linear-gradient(90deg,#1a7a4a,#28a865)}
+.bf-orange{background:linear-gradient(90deg,#c97d10,var(--orange))}
+.bar-val{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--navy);font-weight:600;min-width:24px}
+
+/* PIE DONUT (CSS only) */
+.donut-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.donut-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* TABLE */
+.search-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
+.search-bar input{padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:'Sarabun',sans-serif;font-size:13px;background:var(--light);outline:none;flex:1;min-width:160px}
+.search-bar input:focus{border-color:var(--blue);background:#fff}
+.search-bar select{padding:8px 11px;border:1.5px solid var(--border);border-radius:7px;font-family:'Sarabun',sans-serif;font-size:13px;background:var(--light);outline:none;cursor:pointer}
+.tbl-wrap{background:#fff;border-radius:10px;border:1.5px solid var(--border);overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--light);color:var(--navy);font-weight:600;padding:9px 11px;text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid #edf4fb;vertical-align:top;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f5f9ff}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-org{background:#dff0fb;color:#1a5580}
+.badge-strat{background:#e6f0fa;color:var(--blue)}
+.detail-btn{background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11.5px;cursor:pointer;color:var(--blue);font-family:'Sarabun',sans-serif}
+.detail-btn:hover{background:var(--light)}
+.no-data{text-align:center;padding:36px;color:var(--muted);font-size:14px}
+
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(26,53,87,.45);z-index:500;align-items:center;justify-content:center;padding:14px}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;max-width:600px;width:100%;max-height:85vh;overflow-y:auto}
+.modal-head{background:linear-gradient(90deg,var(--blue),var(--sky));color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-radius:12px 12px 0 0;position:sticky;top:0}
+.modal-head h3{font-size:14.5px;font-weight:700}
+.modal-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
+.modal-body{padding:16px 18px}
+.mrow{margin-bottom:11px}
+.mlbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.mval{font-size:13px;color:var(--text);line-height:1.6}
+.mval-num{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--navy)}
+.mdiv{border:none;border-top:1px solid var(--border);margin:12px 0}
+
+
+/* ADMIN LOGIN MODAL */
+.admin-modal-bg{display:none;position:fixed;inset:0;background:rgba(26,53,87,.5);z-index:600;align-items:center;justify-content:center;padding:20px}
+.admin-modal-bg.open{display:flex}
+.admin-modal{background:#fff;border-radius:12px;width:100%;max-width:340px;overflow:hidden;box-shadow:0 8px 32px rgba(26,53,87,.2)}
+.admin-modal-head{background:linear-gradient(90deg,var(--navy),var(--blue));color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.admin-modal-head h3{font-size:15px;font-weight:700}
+.admin-modal-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
+.admin-modal-body{padding:20px}
+.admin-modal-body label{display:block;font-size:13px;font-weight:600;color:var(--navy);margin-bottom:5px}
+.admin-modal-body input{width:100%;font-family:'Sarabun',sans-serif;font-size:14px;background:var(--light);border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;outline:none;margin-bottom:14px;transition:.2s}
+.admin-modal-body input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,168,.12)}
+.admin-modal-err{font-size:12px;color:var(--err);margin-bottom:10px;display:none}
+.admin-modal-err.show{display:block}
+.admin-modal-btn{width:100%;background:linear-gradient(90deg,var(--blue),var(--sky));color:#fff;border:none;border-radius:8px;padding:12px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+.admin-modal-btn:hover{opacity:.9}
+@media(max-width:540px){
+  .sec-body{padding:16px 12px 12px}
+  .sec-head{padding:13px 14px 11px}
+  .btn-row{flex-direction:column-reverse}
+  .btn-back{flex:1}
+  .suc-card{padding:22px 14px}
+  .chart-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="top-nav" id="topNav">
+  <button class="active" onclick="showTab('form')">📝 แบบฟอร์มกรอกข้อมูล</button>
+  <button onclick="showTab('dash')">📊 แดชบอร์ดรายงาน</button>
+</div>
+
+<!-- ======== FORM TAB ======== -->
+<div id="formTab">
+<header class="site-header">
+  <div class="header-badge">ปีงบประมาณ พ.ศ. 2569</div>
+  <h1>แบบเก็บข้อมูลโครงการ/กิจกรรม<br>ที่ขับเคลื่อนพื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่</h1>
+  <p class="sub">สำนักงานศึกษาธิการจังหวัดเชียงใหม่</p>
+</header>
+
+<div class="prog-wrap" id="progBar" style="display:none">
+  <div class="prog-steps" id="stepList"></div>
+  <div class="prog-txt" id="progTxt"></div>
+</div>
+
+<div class="main-wrap" id="mainWrap">
+
+  <!-- INTRO -->
+  <div class="intro-panel" id="introPanel">
+    <div class="intro-head"><h2>คำชี้แจงการกรอกข้อมูล</h2></div>
+    <div class="intro-body">
+      <p>สำนักงานศึกษาธิการจังหวัดเชียงใหม่ ขอความอนุเคราะห์หน่วยงานและสถานศึกษานำร่องจัดส่งข้อมูลโครงการ/กิจกรรมที่ดำเนินการในปีงบประมาณ พ.ศ. 2569 จากทุกแหล่งงบประมาณ ที่มีความสอดคล้องกับประเด็นยุทธศาสตร์และกลยุทธ์ภายใต้แผนยุทธศาสตร์การขับเคลื่อนพื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่ (พ.ศ. 2566–2570)</p>
+      <div class="note"><strong>หมายเหตุ :</strong> กรณีมีหลายโครงการ ขอให้กรอกข้อมูลแยกเป็นรายโครงการ<br>การจัดเก็บข้อมูลครั้งนี้ <strong>มิใช่การเสนอของบประมาณเพิ่มเติม</strong></div>
+      <button class="start-btn" onclick="startForm()">เริ่มกรอกแบบฟอร์ม →</button>
+    </div>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="form-card" id="formCard" style="display:none">
+
+    <!-- SEC 1: หน่วยงาน -->
+    <div class="sec-panel" id="sec1">
+      <div class="sec-head"><div class="stag">ส่วนที่ 1 จาก 4</div><h2>ข้อมูลหน่วยงาน/สถานศึกษา</h2></div>
+      <div class="sec-body">
+        <div class="field" id="f1">
+          <label><span class="qnum">1.</span>ประเภทหน่วยงาน/สถานศึกษา<span class="req">*</span></label>
+          <div class="opt-list" id="orgTypeList"></div>
+          <div class="other-wrap" id="ow_q1"><input type="text" id="ot_q1" placeholder="ระบุประเภทหน่วยงาน..."></div>
+          <div class="ferr">กรุณาเลือกประเภทหน่วยงาน</div>
+        </div>
+        <div class="field" id="f2">
+          <label><span class="qnum">2.</span>ชื่อหน่วยงาน/สถานศึกษา<span class="req">*</span></label>
+          <input type="text" id="q2" placeholder="ระบุชื่อหน่วยงานหรือสถานศึกษา...">
+          <div class="ferr">กรุณาระบุชื่อหน่วยงาน</div>
+        </div>
+        <div class="field" id="f3">
+          <label><span class="qnum">3.</span>ชื่อผู้รับผิดชอบ<span class="req">*</span></label>
+          <input type="text" id="q3" placeholder="ชื่อ-นามสกุล ผู้รับผิดชอบโครงการ...">
+          <div class="ferr">กรุณาระบุชื่อผู้รับผิดชอบ</div>
+        </div>
+        <div class="field" id="f4">
+          <label><span class="qnum">4.</span>เบอร์โทรศัพท์<span class="req">*</span> <span class="hint">(10 หลัก เช่น 0812345678)</span></label>
+          <input type="tel" id="q4" placeholder="0XXXXXXXXX" maxlength="10" oninput="checkPhone(this)" onkeypress="return /[0-9]/.test(event.key)">
+          <div class="phone-hint" id="phoneHint"></div>
+          <div class="ferr">กรุณาระบุเบอร์โทรศัพท์ 10 หลัก</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-next" onclick="goNext(1)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEC 2: โครงการ -->
+    <div class="sec-panel" id="sec2">
+      <div class="sec-head"><div class="stag">ส่วนที่ 2 จาก 4</div><h2>ข้อมูลโครงการ</h2></div>
+      <div class="sec-body">
+        <div class="field" id="f5">
+          <label><span class="qnum">5.</span>ชื่อโครงการ/กิจกรรม<span class="req">*</span></label>
+          <input type="text" id="q5" placeholder="ระบุชื่อโครงการหรือกิจกรรม...">
+          <div class="ferr">กรุณาระบุชื่อโครงการ</div>
+        </div>
+
+        <div class="field" id="f6">
+          <label><span class="qnum">6.</span>แหล่งงบประมาณ<span class="req">*</span> <span class="hint">(เลือกได้หลายข้อ และระบุยอดงบของแต่ละแหล่ง)</span></label>
+          <div class="opt-list" id="budgetList">
+            <!-- items injected by JS -->
+          </div>
+          <div class="ferr">กรุณาเลือกแหล่งงบประมาณ</div>
+        </div>
+
+        <div class="field" id="f7">
+          <label><span class="qnum">7.</span>งบประมาณรวมทั้งสิ้น (บาท)<span class="req">*</span></label>
+          <input type="number" id="q7" placeholder="คำนวณอัตโนมัติจากแหล่งงบด้านบน หรือระบุเอง" min="0" oninput="syncTotalBudget('manual')">
+          <div class="ferr">กรุณาระบุงบประมาณ</div>
+        </div>
+
+        <div class="field" id="f8">
+          <label><span class="qnum">8.</span>ระยะเวลาดำเนินการ<span class="req">*</span> <span class="hint">(เลือกได้หลายข้อ)</span></label>
+          <div class="opt-list" id="periodList"></div>
+          <div class="other-wrap" id="ow_q8"><input type="text" id="ot_q8" placeholder="ระบุระยะเวลาอื่น..."></div>
+          <div class="ferr">กรุณาเลือกระยะเวลาดำเนินการ</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-back" onclick="goPrev(2)">← ย้อนกลับ</button>
+          <button class="btn btn-next" onclick="goNext(2)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEC 3: ยุทธศาสตร์ -->
+    <div class="sec-panel" id="sec3">
+      <div class="sec-head"><div class="stag">ส่วนที่ 3 จาก 4</div><h2>ความเชื่อมโยงยุทธศาสตร์</h2><p>เลือกยุทธศาสตร์และกลยุทธ์ที่สอดคล้อง (เลือกได้หลายข้อ)</p></div>
+      <div class="sec-body">
+        <div class="field" id="f9">
+          <label><span class="qnum">9.</span>ยุทธศาสตร์และกลยุทธ์ที่สอดคล้อง<span class="req">*</span></label>
+          <div id="stratContainer"><!-- injected --></div>
+          <div class="ferr">กรุณาเลือกอย่างน้อย 1 กลยุทธ์</div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-back" onclick="goPrev(3)">← ย้อนกลับ</button>
+          <button class="btn btn-next" onclick="goNext(3)">ถัดไป →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEC 4: ผลลัพธ์ -->
+    <div class="sec-panel" id="sec4">
+      <div class="sec-head"><div class="stag">ส่วนที่ 4 จาก 4</div><h2>ผลลัพธ์และข้อเสนอแนะ</h2></div>
+      <div class="sec-body">
+
+        <div class="field" id="f10">
+          <label><span class="qnum">10.</span>กลุ่มเป้าหมาย<span class="req">*</span> <span class="hint">(เลือกได้หลายข้อ และระบุจำนวนแต่ละกลุ่ม)</span></label>
+          <div class="opt-list" id="targetList"><!-- injected --></div>
+          <div class="ferr">กรุณาเลือกกลุ่มเป้าหมาย</div>
+        </div>
+
+        <div class="field" id="f11">
+          <label><span class="qnum">11.</span>จำนวนกลุ่มเป้าหมายรวม (คน)<span class="req">*</span></label>
+          <input type="number" id="q11" placeholder="คำนวณอัตโนมัติ หรือระบุเอง" min="0" oninput="syncTotalTarget('manual')">
+          <div class="ferr">กรุณาระบุจำนวนกลุ่มเป้าหมาย</div>
+        </div>
+
+        <div class="field" id="f12">
+          <label><span class="qnum">12.</span>ผลลัพธ์สำคัญที่คาดว่าจะได้รับ</label>
+          <textarea id="q12" placeholder="ระบุผลลัพธ์สำคัญที่คาดว่าจะได้รับ..."></textarea>
+        </div>
+        <div class="field" id="f13">
+          <label><span class="qnum">13.</span>หากมีงบประมาณสนับสนุนเพิ่มเติม ต้องการขยายผลเรื่องใด<span class="req">*</span></label>
+          <textarea id="q13" placeholder="ระบุสิ่งที่ต้องการขยายผล..."></textarea>
+          <div class="ferr">กรุณาระบุข้อมูล</div>
+        </div>
+        <div class="field" id="f14">
+          <label><span class="qnum">14.</span>ข้อเสนอแนะต่อการขับเคลื่อนพื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่<span class="req">*</span></label>
+          <textarea id="q14" placeholder="ระบุข้อเสนอแนะของท่าน..."></textarea>
+          <div class="ferr">กรุณาระบุข้อเสนอแนะ</div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-back" onclick="goPrev(4)">← ย้อนกลับ</button>
+          <button class="btn btn-submit" onclick="submitForm()">✓ ส่งข้อมูล</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /formCard -->
+</div><!-- /mainWrap -->
+
+<!-- SUCCESS -->
+<div id="successPage">
+  <div class="suc-card">
+    <div class="suc-icon">✓</div>
+    <h2>ส่งข้อมูลเรียบร้อยแล้ว</h2>
+    <p>ขอบคุณที่ส่งข้อมูลโครงการมายังสำนักงานศึกษาธิการจังหวัดเชียงใหม่</p>
+    <div class="suc-sum" id="sucSum"></div>
+    <div id="sendStatus" style="display:none;border:1.5px solid;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;line-height:1.6;text-align:center"></div>
+    <button class="btn-new" onclick="resetForm()">+ กรอกข้อมูลโครงการถัดไป</button>
+  </div>
+</div>
+</div><!-- /formTab -->
+
+<!-- ======== DASHBOARD TAB ======== -->
+<div id="dashTab">
+<div id="dashPage">
+  <div class="dash-topbar">
+    <h2>📊 แดชบอร์ดรายงาน — พื้นที่นวัตกรรมการศึกษาเชียงใหม่ 2569</h2>
+    <div class="dash-actions" id="dashActions">
+      <!-- Excel button shown only after admin login -->
+    </div>
+  </div>
+  <!-- KPI -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- CHARTS row 1 -->
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>📂 จำนวนโครงการตามประเภทหน่วยงาน</h3>
+      <div class="bar-wrap" id="chartOrg"></div>
+    </div>
+    <div class="chart-box">
+      <h3>💰 งบประมาณตามแหล่งงบ (บาท)</h3>
+      <div class="bar-wrap" id="chartBudget"></div>
+    </div>
+  </div>
+
+  <!-- CHARTS row 2 -->
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>👥 กลุ่มเป้าหมาย</h3>
+      <div class="bar-wrap" id="chartTarget"></div>
+    </div>
+    <div class="chart-box">
+      <h3>🗓 ระยะเวลาดำเนินการ</h3>
+      <div class="bar-wrap" id="chartPeriod"></div>
+    </div>
+  </div>
+
+  <!-- CHART full: strategy -->
+  <div class="chart-grid">
+    <div class="chart-box full">
+      <h3>🎯 ยุทธศาสตร์ที่เชื่อมโยงมากที่สุด (Top 10)</h3>
+      <div class="bar-wrap" id="chartStrat"></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="chart-box full" style="margin-top:0">
+    <h3>📋 รายการโครงการทั้งหมด</h3>
+    <div class="search-bar">
+      <input type="text" id="searchBox" placeholder="🔍 ค้นหาโครงการ / หน่วยงาน..." oninput="renderTable()">
+      <select id="filterOrg" onchange="renderTable()">
+        <option value="">— ทุกประเภทหน่วยงาน —</option>
+        <option>โรงเรียนนำร่อง</option>
+        <option>สำนักงานเขตพื้นที่การศึกษาประถมศึกษา</option>
+        <option>สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>หน่วยงาน</th><th>ประเภท</th><th>ชื่อโครงการ</th><th>งบประมาณ</th><th>กลุ่มเป้าหมาย (คน)</th><th>ยุทธศาสตร์</th><th></th></tr></thead>
+        <tbody id="adminTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div><!-- /dashTab -->
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="admin-modal-bg" id="adminModalBg">
+  <div class="admin-modal">
+    <div class="admin-modal-head">
+      <h3>🔑 เข้าสู่ระบบ Admin</h3>
+      <button class="admin-modal-close" id="adminModalClose">×</button>
+    </div>
+    <div class="admin-modal-body">
+      <label>รหัสผ่าน Admin</label>
+      <input type="password" id="adminPinInput" placeholder="ระบุรหัสผ่าน...">
+      <div class="admin-modal-err" id="adminPinErr">รหัสผ่านไม่ถูกต้อง</div>
+      <button class="admin-modal-btn" id="adminPinBtn">ยืนยัน → ดาวน์โหลด Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head"><h3 id="modalTitle">รายละเอียดโครงการ</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ===== APPS SCRIPT CONFIG =====
+// *** วาง URL ของ Web App จาก Apps Script ที่นี่ ***
+var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzJFg17mcXj2gFmhEDb364tKx-DdKj2HANwl6IGF5YHZfmG7b4TtzwOUtlOp6IWVPL2w/exec';
+// ตัวอย่าง: 'https://script.google.com/macros/s/AKfyc.../exec'
+
+// ===== DATA DEFINITIONS =====
+const BUDGET_SOURCES = [
+  'งบประมาณต้นสังกัด','งบประมาณสถานศึกษา','งบประมาณ อปท.',
+  'งบประมาณจังหวัด','กสศ.','ภาครัฐอื่น','ภาคเอกชน/CSR',
+  'มูลนิธิ/องค์กรสาธารณประโยชน์','ระดมทรัพยากรจากชุมชน','อื่นๆ'
+];
+const TARGET_GROUPS = ['ผู้เรียน','ครู','ผู้บริหาร','ผู้ปกครอง','ชุมชน','ภาคีเครือข่าย','อื่นๆ'];
+
+const STRATEGIES = [
+  {head:'ด้านการคิดค้นและพัฒนานวัตกรรมการศึกษาและการเรียนรู้', groups:[
+    {lbl:'ยุทธศาสตร์ที่ 1 พัฒนานวัตกรรมการศึกษาและการเรียนรู้', items:[
+      '1.1 พัฒนานวัตกรรมการศึกษาและการเรียนรู้ที่ตอบสนองความต้องการระดับปัจเจกบุคคลและชุมชน',
+      '1.2 สร้างเวทีสาธารณะเพื่อการแลกเปลี่ยนแบ่งปันนวัตกรรมและองค์ความรู้ (CoPs)'
+    ]}
+  ]},
+  {head:'ด้านการลดความเหลื่อมล้ำในการศึกษา', groups:[
+    {lbl:'ยุทธศาสตร์ที่ 2 สร้างความเสมอภาค ลดความเหลื่อมล้ำ', items:[
+      '2.1 เพิ่มโอกาสทางการศึกษาให้ทั่วถึงมีคุณภาพ',
+      '2.2 สร้างความเสมอภาคในการเรียนรู้เพื่อลดความเหลื่อมล้ำ',
+      '2.3 ส่งเสริมผู้เรียนที่มีความต้องการจำเป็นพิเศษ'
+    ]},
+    {lbl:'ยุทธศาสตร์ที่ 3 จัดระบบคุ้มครองสิทธิและการส่งต่อผู้เรียน', items:[
+      '3.1 ส่งเสริมให้ผู้เรียนมีส่วนร่วมในการพัฒนาการเรียนรู้',
+      '3.2 สร้างสถานศึกษาแห่งความปลอดภัยสำหรับทุกคน',
+      '3.3 ส่งเสริมให้ผู้เรียนแสดงออกเชิงสร้างสรรค์ทันสถานการณ์โลก',
+      '3.4 จัดระบบดูแลช่วยเหลือนักเรียนอย่างมีประสิทธิภาพ',
+      '3.5 จัดกระบวนการเรียนรู้และส่งต่อด้านทักษะชีวิต ทักษะวิชาการ ทักษะอาชีพ',
+      '3.6 จัดระบบโภชนาการและสุขภาพอย่างมีประสิทธิภาพ',
+      '3.7 ลดอัตราการออกกลางคัน (Zero Dropout)'
+    ]},
+    {lbl:'ยุทธศาสตร์ที่ 4 ลงทุนด้านโครงสร้างพื้นฐานและระบบนิเวศการศึกษา', items:[
+      '4.1 สนับสนุนเทคโนโลยี สื่อ นวัตกรรมเพื่อพัฒนาการบริหารและการสอน',
+      '4.2 พัฒนาแหล่งเรียนรู้ภายในและภายนอกอย่างหลากหลาย',
+      '4.3 สร้างสถานศึกษาแห่งความสุขและความปลอดภัย',
+      '4.4 สนับสนุนระบบสาธารณูปโภคอย่างทั่วถึง'
+    ]}
+  ]},
+  {head:'ด้านการกระจายอำนาจและให้อิสระแก่หน่วยงาน', groups:[
+    {lbl:'ยุทธศาสตร์ที่ 5 พัฒนาระบบงบประมาณและทรัพยากรเชิงพื้นที่', items:[
+      '5.1 พัฒนาระบบบริหารงบประมาณเชิงพื้นที่',
+      '5.2 พัฒนาระบบบริหารสินทรัพย์เชิงพื้นที่',
+      '5.3 พัฒนาระบบบริหารงานบุคคลเชิงสมรรถนะ',
+      '5.4 วิจัยพัฒนานวัตกรรมการศึกษาเพื่อยกระดับผลสัมฤทธิ์'
+    ]},
+    {lbl:'ยุทธศาสตร์ที่ 6 ยกขีดสมรรถนะการบริหารจัดการศึกษาเชิงพื้นที่', items:[
+      '6.1 จัดระบบและโครงสร้างบริหารการศึกษาจังหวัด',
+      '6.2 กำหนดยุทธศาสตร์และกลไกติดตามประเมินผล',
+      '6.3 เสริมสร้างความพร้อมนำยุทธศาสตร์สู่การปฏิบัติ',
+      '6.4 พัฒนาขีดความสามารถในการพัฒนานวัตกรรมทางการศึกษา'
+    ]}
+  ]},
+  {head:'ด้านการสร้างกลไกการจัดการศึกษาร่วมกันระหว่างทุกภาคส่วน', groups:[
+    {lbl:'ยุทธศาสตร์ที่ 7 เปิดเวทีและสร้างกลไกการมีส่วนร่วม', items:[
+      '7.1 เปิดเวทีสาธารณะกำหนดนโยบายร่วมทุกภาคส่วน',
+      '7.2 สร้างกลไกการมีส่วนร่วมในการขับเคลื่อน',
+      '7.3 พัฒนาเครือข่ายภาคีหุ้นส่วนการศึกษา (Educational Partnership)'
+    ]},
+    {lbl:'ยุทธศาสตร์ที่ 8 เสริมสร้างระบบติดตามและประเมินผลเพื่อการพัฒนายั่งยืน', items:[
+      '8.1 พัฒนาระบบคลังข้อมูล CM-Edu Data Warehouse',
+      '8.2 จัดทำฐานข้อมูลสารสนเทศการบริหารจัดการศึกษา',
+      '8.3 พัฒนาระบบประกันคุณภาพและ Warning Sign System',
+      '8.4 รวบรวมและนำเสนอแนวปฏิบัติที่ดีในการบริหารจัดการ',
+      '8.5 ศึกษา วิเคราะห์ วิจัยและพัฒนานวัตกรรมทางการศึกษา'
+    ]}
+  ]}
+];
+
+// ===== STATE =====
+let curSec = 1;
+const TOTAL = 4;
+const STEP_LBLS = ['หน่วยงาน','ข้อมูลโครงการ','ยุทธศาสตร์','ผลลัพธ์'];
+const radioState = {q1:''};
+const checkState = {q8:[],q9:[]};
+// budget: {source: amount}
+const budgetAmounts = {};
+// target: {group: count}
+const targetCounts = {};
+// selected budget sources & target groups
+const budgetSel = [];
+const targetSel = [];
+let records = [];
+
+// ===== BUILD BUDGET LIST =====
+function buildBudgetList() {
+  var c = document.getElementById('budgetList');
+  BUDGET_SOURCES.forEach(function(src) {
+    var isOther = src === 'อื่นๆ';
+    var amtKey = 'bamt_' + src;
+    var wrap = document.createElement('div');
+
+    var item = document.createElement('div');
+    item.className = 'opt-item';
+    item.setAttribute('data-src', src);
+    item.innerHTML = '<div class="chk-box"></div><span class="opt-txt">' + src + '</span>';
+    item.addEventListener('click', function() { toggleBudgetSource(src, item, wrap); });
+    wrap.appendChild(item);
+
+    var inlineWrap = document.createElement('div');
+    inlineWrap.className = 'inline-input-wrap';
+    inlineWrap.id = 'bwrap_' + src;
+
+    if(isOther) {
+      var lbl1 = document.createElement('label'); lbl1.textContent = 'ระบุแหล่งงบ';
+      var inp1 = document.createElement('input'); inp1.type='text'; inp1.id='bother_txt'; inp1.placeholder='ระบุแหล่งงบประมาณอื่น...'; inp1.style.marginBottom='6px';
+      var lbl2 = document.createElement('label'); lbl2.textContent = 'จำนวนงบประมาณ (บาท)';
+      var inp2 = document.createElement('input'); inp2.type='number'; inp2.id=amtKey; inp2.placeholder='0'; inp2.min='0';
+      inp2.addEventListener('input', function() { syncTotalBudget(); });
+      var baht = document.createElement('div'); baht.className='baht'; baht.textContent='บาท';
+      inlineWrap.appendChild(lbl1); inlineWrap.appendChild(inp1);
+      inlineWrap.appendChild(lbl2); inlineWrap.appendChild(inp2); inlineWrap.appendChild(baht);
+    } else {
+      var lbl = document.createElement('label'); lbl.textContent = 'จำนวนงบประมาณจาก "' + src + '" (บาท)';
+      var inp = document.createElement('input'); inp.type='number'; inp.id=amtKey; inp.placeholder='0'; inp.min='0';
+      inp.addEventListener('input', function() { syncTotalBudget(); });
+      var baht = document.createElement('div'); baht.className='baht'; baht.textContent='บาท';
+      inlineWrap.appendChild(lbl); inlineWrap.appendChild(inp); inlineWrap.appendChild(baht);
+    }
+    wrap.appendChild(inlineWrap);
+    c.appendChild(wrap);
+  });
+}
+
+function toggleBudgetSource(src, item, wrap) {
+  const on = item.classList.toggle('on');
+  const inlineWrap = wrap.querySelector('.inline-input-wrap');
+  inlineWrap.classList.toggle('show', on);
+  const idx = budgetSel.indexOf(src);
+  if(on && idx === -1) budgetSel.push(src);
+  else if(!on && idx !== -1) { budgetSel.splice(idx,1); syncTotalBudget(); }
+  document.getElementById('f6').classList.remove('err');
+}
+
+function syncTotalBudget(mode) {
+  if(mode === 'manual') return; // user typed manually, don't overwrite
+  let total = 0;
+  BUDGET_SOURCES.forEach(src => {
+    const el = document.getElementById('bamt_' + src);
+    if(el) total += parseInt(el.value||0);
+  });
+  const q7 = document.getElementById('q7');
+  if(total > 0) q7.value = total;
+}
+
+// ===== BUILD TARGET LIST =====
+function buildTargetList() {
+  var c = document.getElementById('targetList');
+  TARGET_GROUPS.forEach(function(grp) {
+    var isOther = grp === 'อื่นๆ';
+    var amtKey = 'tamt_' + grp;
+    var wrap = document.createElement('div');
+
+    var item = document.createElement('div');
+    item.className = 'opt-item';
+    item.setAttribute('data-grp', grp);
+    item.innerHTML = '<div class="chk-box"></div><span class="opt-txt">' + grp + '</span>';
+    item.addEventListener('click', function() { toggleTargetGroup(grp, item, wrap); });
+    wrap.appendChild(item);
+
+    var inlineWrap = document.createElement('div');
+    inlineWrap.className = 'inline-input-wrap';
+    inlineWrap.id = 'twrap_' + grp;
+
+    if(isOther) {
+      var lbl1 = document.createElement('label'); lbl1.textContent = 'ระบุกลุ่มเป้าหมายอื่น';
+      var inp1 = document.createElement('input'); inp1.type='text'; inp1.id='tother_txt'; inp1.placeholder='ระบุกลุ่มเป้าหมาย...'; inp1.style.marginBottom='6px';
+      var lbl2 = document.createElement('label'); lbl2.textContent = 'จำนวน (คน)';
+      var inp2 = document.createElement('input'); inp2.type='number'; inp2.id=amtKey; inp2.placeholder='0'; inp2.min='0';
+      inp2.addEventListener('input', function() { syncTotalTarget(); });
+      inlineWrap.appendChild(lbl1); inlineWrap.appendChild(inp1);
+      inlineWrap.appendChild(lbl2); inlineWrap.appendChild(inp2);
+    } else {
+      var lbl = document.createElement('label'); lbl.textContent = 'จำนวน' + grp + ' (คน)';
+      var inp = document.createElement('input'); inp.type='number'; inp.id=amtKey; inp.placeholder='0'; inp.min='0';
+      inp.addEventListener('input', function() { syncTotalTarget(); });
+      inlineWrap.appendChild(lbl); inlineWrap.appendChild(inp);
+    }
+    wrap.appendChild(inlineWrap);
+    c.appendChild(wrap);
+  });
+}
+
+function toggleTargetGroup(grp, item, wrap) {
+  const on = item.classList.toggle('on');
+  const inlineWrap = wrap.querySelector('.inline-input-wrap');
+  inlineWrap.classList.toggle('show', on);
+  const idx = targetSel.indexOf(grp);
+  if(on && idx === -1) targetSel.push(grp);
+  else if(!on && idx !== -1) { targetSel.splice(idx,1); syncTotalTarget(); }
+  document.getElementById('f10').classList.remove('err');
+}
+
+function syncTotalTarget(mode) {
+  if(mode === 'manual') return;
+  let total = 0;
+  TARGET_GROUPS.forEach(grp => {
+    const el = document.getElementById('tamt_' + grp);
+    if(el) total += parseInt(el.value||0);
+  });
+  const q11 = document.getElementById('q11');
+  if(total > 0) q11.value = total;
+}
+
+// ===== BUILD STRATEGY =====
+function buildStrategy() {
+  const c = document.getElementById('stratContainer');
+  STRATEGIES.forEach(sec => {
+    const grpDiv = document.createElement('div');
+    grpDiv.className = 'strat-group';
+    const sub = document.createElement('div');
+    sub.innerHTML = '<div class="strat-gh">' + sec.head + '</div>';
+    const subInner = document.createElement('div');
+    subInner.className = 'strat-sub';
+    sec.groups.forEach(g => {
+      const lblDiv = document.createElement('div');
+      lblDiv.className = 'strat-lbl';
+      lblDiv.textContent = g.lbl;
+      subInner.appendChild(lblDiv);
+      const listDiv = document.createElement('div');
+      listDiv.className = 'opt-list';
+      g.items.forEach(function(item) {
+        const el = document.createElement('div');
+        el.className = 'opt-item';
+        el.setAttribute('data-val', item);
+        el.innerHTML = '<div class="chk-box"></div><span class="opt-txt">' + item + '</span>';
+        el.addEventListener('click', function() {
+          stratToggle(this);
+        });
+        listDiv.appendChild(el);
+      });
+      subInner.appendChild(listDiv);
+    });
+    sub.appendChild(subInner);
+    grpDiv.appendChild(sub);
+    c.appendChild(grpDiv);
+  });
+}
+
+function stratToggle(el) {
+  var val = el.getAttribute('data-val');
+  el.classList.toggle('on');
+  var idx = checkState.q9.indexOf(val);
+  if (idx === -1) checkState.q9.push(val);
+  else checkState.q9.splice(idx, 1);
+  document.getElementById('f9').classList.remove('err');
+}
+
+// ===== PHONE VALIDATION =====
+function checkPhone(el) {
+  const v = el.value.replace(/\D/g,'');
+  el.value = v.substring(0,10);
+  const hint = document.getElementById('phoneHint');
+  if(v.length === 0) { hint.className='phone-hint'; return; }
+  if(v.length < 10) {
+    hint.className='phone-hint show bad';
+    hint.textContent = `กรอก ${v.length}/10 หลัก — ต้องการอีก ${10-v.length} หลัก`;
+  } else {
+    hint.className='phone-hint show good';
+    hint.textContent = '✓ เบอร์โทรศัพท์ครบ 10 หลัก';
+    document.getElementById('f4').classList.remove('err');
+  }
+}
+
+// ===== OPTION HANDLERS =====
+function pickRadio(key, el, val, otherWrapId) {
+  el.closest('.opt-list').querySelectorAll('.opt-item').forEach(i=>i.classList.remove('on'));
+  el.classList.add('on');
+  radioState[key] = val;
+  const field = el.closest('.field');
+  field.querySelectorAll('.other-wrap').forEach(w=>w.classList.remove('show'));
+  if(otherWrapId) document.getElementById(otherWrapId).classList.add('show');
+  field.classList.remove('err');
+}
+
+function pickCheck(key, el, val, otherWrapId) {
+  el.classList.toggle('on');
+  const idx = checkState[key].indexOf(val);
+  if(idx===-1) checkState[key].push(val);
+  else checkState[key].splice(idx,1);
+  if(otherWrapId) document.getElementById(otherWrapId)?.classList.toggle('show', checkState[key].includes(val));
+  el.closest('.field')?.classList.remove('err');
+}
+
+// ===== PROGRESS =====
+function buildProg() {
+  const sl = document.getElementById('stepList');
+  sl.innerHTML = '';
+  STEP_LBLS.forEach((lbl,i) => {
+    const n = i+1;
+    const cls = n<curSec?'done':n===curSec?'active':'';
+    sl.innerHTML += `<div class="pstep ${cls}" onclick="if(${n}<${curSec})showSec(${n})">
+      <div class="pstep-c">${n<curSec?'✓':n}</div>
+      <div class="pstep-l">${lbl}</div></div>`;
+    if(i<STEP_LBLS.length-1) sl.innerHTML += `<div class="pstep-line ${n<curSec?'done':''}"></div>`;
+  });
+  document.getElementById('progTxt').textContent = `ส่วนที่ ${curSec} จาก ${TOTAL}`;
+}
+
+// ===== VALIDATE =====
+function validate(sec) {
+  let ok = true;
+  const clr = (...ids) => ids.forEach(id=>document.getElementById(id)?.classList.remove('err'));
+  const setE = id => { document.getElementById(id)?.classList.add('err'); ok=false; };
+
+  if(sec===1) {
+    clr('f1','f2','f3','f4');
+    if(!radioState.q1) setE('f1');
+    else if(radioState.q1==='อื่นๆ' && !document.getElementById('ot_q1').value.trim()) setE('f1');
+    if(!document.getElementById('q2').value.trim()) setE('f2');
+    if(!document.getElementById('q3').value.trim()) setE('f3');
+    const ph = document.getElementById('q4').value.replace(/\D/g,'');
+    if(ph.length!==10) setE('f4');
+  }
+  if(sec===2) {
+    clr('f5','f6','f7','f8');
+    if(!document.getElementById('q5').value.trim()) setE('f5');
+    if(budgetSel.length===0) setE('f6');
+    if(!document.getElementById('q7').value) setE('f7');
+    if(checkState.q8.length===0) setE('f8');
+  }
+  if(sec===3) {
+    clr('f9');
+    if(checkState.q9.length===0) setE('f9');
+  }
+  if(sec===4) {
+    clr('f10','f11','f13','f14');
+    if(targetSel.length===0) setE('f10');
+    if(!document.getElementById('q11').value) setE('f11');
+    if(!document.getElementById('q13').value.trim()) setE('f13');
+    if(!document.getElementById('q14').value.trim()) setE('f14');
+  }
+  return ok;
+}
+
+// ===== NAV =====
+function showSec(n) {
+  document.querySelectorAll('.sec-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('sec'+n).classList.add('active');
+  curSec=n; buildProg();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goNext(sec) {
+  if(!validate(sec)) {
+    document.querySelector('#sec'+sec+' .field.err')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  if(sec<TOTAL) showSec(sec+1);
+}
+function goPrev(sec) { if(sec>1) showSec(sec-1); }
+
+function startForm() {
+  document.getElementById('introPanel').style.display='none';
+  document.getElementById('formCard').style.display='block';
+  document.getElementById('progBar').style.display='block';
+  buildProg(); showSec(1);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== SUBMIT =====
+function submitForm() {
+  if(!validate(4)) {
+    document.querySelector('#sec4 .field.err')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  const q1v = radioState.q1==='อื่นๆ' ? document.getElementById('ot_q1').value : radioState.q1;
+
+  // collect budget breakdown
+  const bdBreakdown = {};
+  budgetSel.forEach(src => {
+    const amt = parseInt(document.getElementById('bamt_'+src)?.value||0);
+    const label = src==='อื่นๆ' ? (document.getElementById('bother_txt')?.value||'อื่นๆ') : src;
+    bdBreakdown[label] = amt;
+  });
+  const bdTotal = parseInt(document.getElementById('q7').value||0);
+
+  // collect target breakdown
+  const tgtBreakdown = {};
+  targetSel.forEach(grp => {
+    const cnt = parseInt(document.getElementById('tamt_'+grp)?.value||0);
+    const label = grp==='อื่นๆ' ? (document.getElementById('tother_txt')?.value||'อื่นๆ') : grp;
+    tgtBreakdown[label] = cnt;
+  });
+  const tgtTotal = parseInt(document.getElementById('q11').value||0);
+
+  const q8other = checkState.q8.includes('อื่นๆ') ? document.getElementById('ot_q8')?.value : '';
+  const period = checkState.q8.filter(v=>v!=='อื่นๆ').concat(q8other?[q8other]:[]).join(', ');
+
+  const rec = {
+    id: Date.now(),
+    ts: new Date().toLocaleString('th-TH'),
+    orgType: q1v,
+    orgName: document.getElementById('q2').value,
+    contact: document.getElementById('q3').value,
+    phone: document.getElementById('q4').value,
+    project: document.getElementById('q5').value,
+    budgetBreakdown: bdBreakdown,
+    budgetSrcStr: Object.keys(bdBreakdown).join(', '),
+    budget: bdTotal,
+    period: period,
+    strategy: checkState.q9.join(' | '),
+    stratCount: checkState.q9.length,
+    targetBreakdown: tgtBreakdown,
+    targetStr: Object.keys(tgtBreakdown).join(', '),
+    targetTotal: tgtTotal,
+    outcome: document.getElementById('q12').value,
+    expand: document.getElementById('q13').value,
+    suggestion: document.getElementById('q14').value,
+  };
+  records.push(rec);
+
+  // ส่งข้อมูลไป Google Sheets (ถ้าตั้ง URL ไว้แล้ว)
+  sendToSheet(rec);
+
+  document.getElementById('sucSum').innerHTML = `
+    <h3>สรุปข้อมูลที่ส่ง</h3>
+    <div class="sr"><span class="sl">หน่วยงาน</span><span class="sv">${rec.orgName} (${rec.orgType})</span></div>
+    <div class="sr"><span class="sl">ชื่อโครงการ</span><span class="sv">${rec.project}</span></div>
+    <div class="sr"><span class="sl">งบประมาณรวม</span><span class="sv">${rec.budget.toLocaleString('th-TH')} บาท</span></div>
+    <div class="sr"><span class="sl">กลุ่มเป้าหมาย</span><span class="sv">${rec.targetStr} (${rec.targetTotal.toLocaleString()} คน)</span></div>
+    <div class="sr"><span class="sl">ยุทธศาสตร์</span><span class="sv">${rec.stratCount} กลยุทธ์</span></div>`;
+
+  document.getElementById('mainWrap').style.display='none';
+  document.getElementById('progBar').style.display='none';
+  document.getElementById('successPage').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== RESET =====
+function resetForm() {
+  radioState.q1='';
+  Object.keys(checkState).forEach(k=>checkState[k]=[]);
+  budgetSel.length=0; targetSel.length=0;
+  document.querySelectorAll('input[type=text],input[type=tel],input[type=number],textarea').forEach(i=>i.value='');
+  document.querySelectorAll('.opt-item').forEach(i=>i.classList.remove('on'));
+  document.querySelectorAll('.other-wrap,.inline-input-wrap').forEach(i=>i.classList.remove('show'));
+  document.querySelectorAll('.field').forEach(i=>i.classList.remove('err'));
+  document.getElementById('phoneHint').className='phone-hint';
+  document.getElementById('successPage').style.display='none';
+  document.getElementById('progBar').style.display='block';
+  document.getElementById('mainWrap').style.display='block';
+  showSec(1);
+}
+
+// ===== TAB =====
+function showTab(tab) {
+  document.getElementById('formTab').style.display = tab==='form'?'block':'none';
+  document.getElementById('dashTab').style.display  = tab==='dash'?'block':'none';
+  document.querySelectorAll('.top-nav button').forEach(function(b,i){
+    b.classList.toggle('active',(i===0&&tab==='form')||(i===1&&tab==='dash'));
+  });
+  if(tab==='dash') renderDash();
+}
+
+// ===== DASHBOARD =====
+function renderDash() {
+  // Render admin action button
+  var actEl = document.getElementById('dashActions');
+  if (actEl) {
+    if (isAdmin) {
+      actEl.innerHTML = '';
+      var xlsBtn = document.createElement('button');
+      xlsBtn.className = 'btn-dl';
+      xlsBtn.textContent = '📥 ดาวน์โหลด Excel (Admin)';
+      xlsBtn.addEventListener('click', function() { exportExcel(); });
+      actEl.appendChild(xlsBtn);
+    } else {
+      actEl.innerHTML = '';
+      var xlsBtn2 = document.createElement('button');
+      xlsBtn2.className = 'btn-dl';
+      xlsBtn2.textContent = '📥 ดาวน์โหลด Excel';
+      xlsBtn2.addEventListener('click', function() { requestExcel(); });
+      actEl.appendChild(xlsBtn2);
+    }
+  }
+  const total = records.length;
+  const totalBudget = records.reduce((s,r)=>s+r.budget,0);
+  const totalPeople = records.reduce((s,r)=>s+r.targetTotal,0);
+  const avgStrat = total ? (records.reduce((s,r)=>s+r.stratCount,0)/total).toFixed(1) : 0;
+
+  document.getElementById('kpiGrid').innerHTML = `
+    <div class="kpi"><div class="kpi-n">โครงการทั้งหมด</div><div class="kpi-v">${total}</div><div class="kpi-u">รายการ</div></div>
+    <div class="kpi green"><div class="kpi-n">งบประมาณรวม</div><div class="kpi-v">${(totalBudget/1000).toFixed(0)}</div><div class="kpi-u">พันบาท</div></div>
+    <div class="kpi orange"><div class="kpi-n">กลุ่มเป้าหมายรวม</div><div class="kpi-v">${totalPeople.toLocaleString()}</div><div class="kpi-u">คน</div></div>
+    <div class="kpi sky"><div class="kpi-n">เฉลี่ยยุทธศาสตร์/โครงการ</div><div class="kpi-v">${avgStrat}</div><div class="kpi-u">กลยุทธ์</div></div>`;
+
+  // org chart
+  const orgMap={};
+  records.forEach(r=>{orgMap[r.orgType]=(orgMap[r.orgType]||0)+1;});
+  drawBars('chartOrg', orgMap, 'bf-blue', total);
+
+  // budget by source
+  const bdMap={};
+  records.forEach(r=>Object.entries(r.budgetBreakdown).forEach(([k,v])=>{bdMap[k]=(bdMap[k]||0)+v;}));
+  drawBars('chartBudget', bdMap, 'bf-green', null, v=>v.toLocaleString());
+
+  // target chart
+  const tgtMap={};
+  records.forEach(r=>Object.entries(r.targetBreakdown).forEach(([k,v])=>{tgtMap[k]=(tgtMap[k]||0)+v;}));
+  drawBars('chartTarget', tgtMap, 'bf-orange', null, v=>v.toLocaleString());
+
+  // period chart
+  const perMap={};
+  records.forEach(r=>r.period.split(',').forEach(p=>{const t=p.trim();if(t)perMap[t]=(perMap[t]||0)+1;}));
+  drawBars('chartPeriod', perMap, 'bf-blue', total);
+
+  // strategy top10
+  const stMap={};
+  records.forEach(r=>r.strategy.split(' | ').forEach(s=>{if(s)stMap[s]=(stMap[s]||0)+1;}));
+  const top10 = Object.entries(stMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  const stObj = Object.fromEntries(top10);
+  drawBars('chartStrat', stObj, 'bf-blue', total);
+
+  renderTable();
+}
+
+function drawBars(containerId, map, colorCls, denominator, fmtFn) {
+  const c = document.getElementById(containerId);
+  if(!c) return;
+  const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  if(!entries.length) { c.innerHTML='<div style="color:var(--muted);font-size:13px;padding:8px 0">ยังไม่มีข้อมูล</div>'; return; }
+  const maxV = Math.max(...entries.map(e=>e[1]),1);
+  c.innerHTML = entries.map(([k,v])=>{
+    const pct = Math.round(v/maxV*100);
+    const display = fmtFn ? fmtFn(v) : v;
+    const lbl = k.length>18 ? k.substring(0,18)+'…' : k;
+    return `<div class="bar-row">
+      <div class="bar-lbl" title="${k}">${lbl}</div>
+      <div class="bar-track"><div class="bar-fill ${colorCls}" style="width:${pct}%"></div></div>
+      <div class="bar-val">${display}${denominator?` <span style="color:var(--muted);font-size:10px">(${(v/denominator*100).toFixed(0)}%)</span>`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable() {
+  const q  = (document.getElementById('searchBox')?.value||'').toLowerCase();
+  const fo = document.getElementById('filterOrg')?.value||'';
+  const filtered = records.filter(r=>
+    (!q||r.project.toLowerCase().includes(q)||r.orgName.toLowerCase().includes(q))&&
+    (!fo||r.orgType===fo||r.orgType.includes(fo)));
+  const tbody = document.getElementById('adminTbody');
+  if(!tbody) return;
+  if(!filtered.length){
+    tbody.innerHTML=`<tr><td colspan="8" class="no-data">ยังไม่มีข้อมูลโครงการ${q||fo?' ที่ตรงเงื่อนไข':''}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = filtered.map((r,i)=>`
+    <tr>
+      <td style="font-family:'IBM Plex Mono',monospace;color:var(--muted);text-align:center">${i+1}</td>
+      <td>${r.orgName}</td>
+      <td><span class="badge badge-org">${r.orgType.length>14?r.orgType.substring(0,14)+'…':r.orgType}</span></td>
+      <td>${r.project}</td>
+      <td style="font-family:'IBM Plex Mono',monospace;text-align:right;white-space:nowrap">${r.budget.toLocaleString('th-TH')}</td>
+      <td style="text-align:right">${r.targetTotal.toLocaleString()}</td>
+      <td style="text-align:center"><span class="badge badge-strat">${r.stratCount} กลยุทธ์</span></td>
+      <td><button class="detail-btn" onclick="openModal(${r.id})">รายละเอียด</button></td>
+    </tr>`).join('');
+}
+
+// ===== MODAL =====
+function openModal(id) {
+  const r = records.find(x=>x.id===id); if(!r) return;
+  document.getElementById('modalTitle').textContent = r.project;
+  const bdRows = Object.entries(r.budgetBreakdown).map(([k,v])=>`<div class="sr"><span class="sl">${k}</span><span class="sv">${v.toLocaleString()} บาท</span></div>`).join('');
+  const tgtRows = Object.entries(r.targetBreakdown).map(([k,v])=>`<div class="sr"><span class="sl">${k}</span><span class="sv">${v.toLocaleString()} คน</span></div>`).join('');
+  document.getElementById('modalBody').innerHTML = `
+    <div class="mrow"><div class="mlbl">หน่วยงาน</div><div class="mval">${r.orgName} (${r.orgType})</div></div>
+    <div class="mrow"><div class="mlbl">ผู้รับผิดชอบ</div><div class="mval">${r.contact} — ${r.phone}</div></div>
+    <hr class="mdiv">
+    <div class="mrow"><div class="mlbl">งบประมาณรวม</div><div class="mval-num">${r.budget.toLocaleString('th-TH')} บาท</div></div>
+    <div class="mrow"><div class="mlbl">แยกตามแหล่งงบ</div><div class="mval">${bdRows||'-'}</div></div>
+    <div class="mrow"><div class="mlbl">ระยะเวลา</div><div class="mval">${r.period}</div></div>
+    <hr class="mdiv">
+    <div class="mrow"><div class="mlbl">ยุทธศาสตร์ (${r.stratCount} กลยุทธ์)</div><div class="mval" style="font-size:12px">${r.strategy.split(' | ').map(s=>`• ${s}`).join('<br>')}</div></div>
+    <hr class="mdiv">
+    <div class="mrow"><div class="mlbl">กลุ่มเป้าหมายรวม ${r.targetTotal.toLocaleString()} คน</div><div class="mval">${tgtRows||'-'}</div></div>
+    ${r.outcome?`<div class="mrow"><div class="mlbl">ผลลัพธ์ที่คาดหวัง</div><div class="mval">${r.outcome}</div></div>`:''}
+    <hr class="mdiv">
+    <div class="mrow"><div class="mlbl">แผนขยายผล</div><div class="mval">${r.expand}</div></div>
+    <div class="mrow"><div class="mlbl">ข้อเสนอแนะ</div><div class="mval">${r.suggestion}</div></div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted)">ส่งข้อมูลเมื่อ: ${r.ts}</div>`;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
+
+
+// ===== EXPORT EXCEL =====
+function exportExcel(){
+  if(!records.length){alert('ยังไม่มีข้อมูลโครงการ');return;}
+  if(typeof XLSX==='undefined'){alert('กำลังโหลด SheetJS กรุณาลองใหม่');return;}
+  const wb=XLSX.utils.book_new();
+
+  // Sheet 1: รายการโครงการ
+  const hdr=['ลำดับ','วันที่ส่ง','ประเภทหน่วยงาน','ชื่อหน่วยงาน','ผู้รับผิดชอบ','โทรศัพท์','ชื่อโครงการ','งบประมาณรวม (บาท)','แหล่งงบประมาณ','รายละเอียดงบแยกแหล่ง','ระยะเวลา','จำนวนยุทธศาสตร์','กลุ่มเป้าหมาย','รายละเอียดกลุ่มเป้าหมาย','จำนวนรวม (คน)','ผลลัพธ์','แผนขยายผล','ข้อเสนอแนะ'];
+  const rows=records.map((r,i)=>[
+    i+1,r.ts,r.orgType,r.orgName,r.contact,r.phone,
+    r.project,r.budget,r.budgetSrcStr,
+    Object.entries(r.budgetBreakdown).map(([k,v])=>`${k}: ${v.toLocaleString()}`).join(' / '),
+    r.period,r.stratCount,r.targetStr,
+    Object.entries(r.targetBreakdown).map(([k,v])=>`${k}: ${v.toLocaleString()}`).join(' / '),
+    r.targetTotal,r.outcome,r.expand,r.suggestion
+  ]);
+  const ws1=XLSX.utils.aoa_to_sheet([hdr,...rows]);
+  ws1['!cols']=[{wch:5},{wch:18},{wch:20},{wch:28},{wch:16},{wch:12},{wch:36},{wch:14},{wch:30},{wch:40},{wch:18},{wch:8},{wch:24},{wch:40},{wch:10},{wch:40},{wch:40},{wch:40}];
+  XLSX.utils.book_append_sheet(wb,ws1,'รายการโครงการ');
+
+  // Sheet 2: สรุปภาพรวม
+  const tot=records.length;
+  const totB=records.reduce((s,r)=>s+r.budget,0);
+  const totP=records.reduce((s,r)=>s+r.targetTotal,0);
+  const orgMap={};records.forEach(r=>{orgMap[r.orgType]=(orgMap[r.orgType]||0)+1;});
+  const bdMap={};records.forEach(r=>Object.entries(r.budgetBreakdown).forEach(([k,v])=>{bdMap[k]=(bdMap[k]||0)+v;}));
+  const tgtMap={};records.forEach(r=>Object.entries(r.targetBreakdown).forEach(([k,v])=>{tgtMap[k]=(tgtMap[k]||0)+v;}));
+  const stMap={};records.forEach(r=>r.strategy.split(' | ').forEach(s=>{if(s)stMap[s]=(stMap[s]||0)+1;}));
+  const today=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+
+  const sumRows=[
+    ['รายงานสรุปภาพรวม — พื้นที่นวัตกรรมการศึกษาจังหวัดเชียงใหม่ ปีงบประมาณ พ.ศ. 2569'],
+    ['จัดทำโดย','สำนักงานศึกษาธิการจังหวัดเชียงใหม่'],
+    ['วันที่พิมพ์',today],[],
+    ['สถิติภาพรวม'],
+    ['จำนวนโครงการทั้งหมด',tot,'รายการ'],
+    ['งบประมาณรวม',totB,'บาท'],
+    ['กลุ่มเป้าหมายรวม',totP,'คน'],[],
+    ['จำนวนโครงการตามประเภทหน่วยงาน'],['ประเภทหน่วยงาน','จำนวน','ร้อยละ'],
+    ...Object.entries(orgMap).map(([k,v])=>[k,v,tot?+(v/tot*100).toFixed(1):0]),
+    [],['งบประมาณตามแหล่ง (บาท)'],['แหล่งงบประมาณ','ยอดงบ (บาท)','ร้อยละ'],
+    ...Object.entries(bdMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,totB?+(v/totB*100).toFixed(1):0]),
+    [],['กลุ่มเป้าหมาย'],['กลุ่ม','จำนวน (คน)','ร้อยละ'],
+    ...Object.entries(tgtMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,totP?+(v/totP*100).toFixed(1):0]),
+  ];
+  const ws2=XLSX.utils.aoa_to_sheet(sumRows);
+  ws2['!cols']=[{wch:40},{wch:20},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws2,'สรุปภาพรวม');
+
+  // Sheet 3: ยุทธศาสตร์
+  const ws3=XLSX.utils.aoa_to_sheet([
+    ['ยุทธศาสตร์/กลยุทธ์','จำนวนโครงการ','ร้อยละ'],
+    ...Object.entries(stMap).sort((a,b)=>b[1]-a[1]).map(([k,v])=>[k,v,tot?+(v/tot*100).toFixed(1):0])
+  ]);
+  ws3['!cols']=[{wch:60},{wch:14},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws3,'ยุทธศาสตร์');
+
+  const d=new Date().toLocaleDateString('th-TH',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');
+  XLSX.writeFile(wb,`รายงานนวัตกรรมการศึกษาเชียงใหม่_${d}.xlsx`);
+}
+
+// ===== DEMO DATA =====
+records.push(
+  {id:1001,ts:'20/06/2569 09:12',orgType:'โรงเรียนนำร่อง',orgName:'โรงเรียนวัดพระธาตุดอยสุเทพ',contact:'นางสาวมาลี ใจดี',phone:'0891234567',project:'โครงการพัฒนาทักษะการคิดวิเคราะห์ด้วย STEM',budgetBreakdown:{'งบประมาณต้นสังกัด':100000,'กสศ.':50000},budgetSrcStr:'งบประมาณต้นสังกัด, กสศ.',budget:150000,period:'ไตรมาส 1, ไตรมาส 2',strategy:'1.1 พัฒนานวัตกรรมการศึกษา | 4.1 สนับสนุนเทคโนโลยี | 5.4 วิจัยพัฒนานวัตกรรม',stratCount:3,targetBreakdown:{'ผู้เรียน':280,'ครู':40},targetStr:'ผู้เรียน, ครู',targetTotal:320,outcome:'นักเรียนมีทักษะการคิดเชิงวิทยาศาสตร์เพิ่มขึ้น 30%',expand:'ขยายไปมัธยมปลาย',suggestion:'ควรเพิ่มครูผู้ช่วยวิทยาศาสตร์'},
+  {id:1002,ts:'20/06/2569 10:05',orgType:'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา',orgName:'สพป.เชียงใหม่ เขต 1',contact:'นายสมชาย วงศ์ดี',phone:'0532345678',project:'โครงการลดความเหลื่อมล้ำด้วยเทคโนโลยีการศึกษา',budgetBreakdown:{'งบประมาณต้นสังกัด':200000,'งบประมาณจังหวัด':80000},budgetSrcStr:'งบประมาณต้นสังกัด, งบประมาณจังหวัด',budget:280000,period:'ดำเนินการตลอดปี',strategy:'2.1 เพิ่มโอกาสทางการศึกษา | 2.2 สร้างความเสมอภาค | 4.1 สนับสนุนเทคโนโลยี | 8.2 จัดทำฐานข้อมูลสารสนเทศ',stratCount:4,targetBreakdown:{'ผู้เรียน':900,'ครู':200,'ผู้บริหาร':100},targetStr:'ผู้เรียน, ครู, ผู้บริหาร',targetTotal:1200,outcome:'ผู้เรียนในพื้นที่ห่างไกลเข้าถึงการศึกษาคุณภาพเพิ่มขึ้น 40%',expand:'ขยายสัญญาณอินเทอร์เน็ต',suggestion:'ควรมีระบบติดตามผลเป็นรายบุคคล'},
+  {id:1003,ts:'20/06/2569 13:44',orgType:'โรงเรียนนำร่อง',orgName:'โรงเรียนบ้านแม่ขิ',contact:'นางประภา สุขสันต์',phone:'0819876543',project:'กิจกรรมส่งเสริมทักษะชีวิตและอาชีพ',budgetBreakdown:{'งบประมาณสถานศึกษา':45000,'ระดมทรัพยากรจากชุมชน':30000},budgetSrcStr:'งบประมาณสถานศึกษา, ระดมทรัพยากรจากชุมชน',budget:75000,period:'ไตรมาส 2, ไตรมาส 3',strategy:'3.5 จัดกระบวนการเรียนรู้ | 3.7 ลดอัตราการออกกลางคัน | 7.3 พัฒนาเครือข่ายภาคีหุ้นส่วน',stratCount:3,targetBreakdown:{'ผู้เรียน':120,'ผู้ปกครอง':40,'ชุมชน':20},targetStr:'ผู้เรียน, ผู้ปกครอง, ชุมชน',targetTotal:180,outcome:'อัตราออกกลางคันลดลง มีทักษะอาชีพพื้นฐาน',expand:'จัดตั้งศูนย์เรียนรู้ทักษะอาชีพในชุมชน',suggestion:'ต้องการงบสนับสนุนวัสดุอุปกรณ์'}
+);
+
+// ===== BUILD ORG TYPE (Radio) =====
+function buildOrgList() {
+  var c = document.getElementById('orgTypeList');
+  var orgs = [
+    {val:'โรงเรียนนำร่อง', other:false},
+    {val:'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา', other:false},
+    {val:'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา', other:false},
+    {val:'อื่นๆ', other:true}
+  ];
+  orgs.forEach(function(o) {
+    var el = document.createElement('div');
+    el.className = 'opt-item';
+    el.setAttribute('data-val', o.val);
+    el.innerHTML = '<div class="radio-box"></div><span class="opt-txt">' + o.val + '</span>';
+    el.addEventListener('click', function() {
+      c.querySelectorAll('.opt-item').forEach(function(i){i.classList.remove('on');});
+      el.classList.add('on');
+      radioState.q1 = o.val;
+      var ow = document.getElementById('ow_q1');
+      if(ow) ow.classList.toggle('show', o.other);
+      document.getElementById('f1').classList.remove('err');
+    });
+    c.appendChild(el);
+  });
+}
+
+// ===== BUILD PERIOD (Checkbox) =====
+function buildPeriodList() {
+  var c = document.getElementById('periodList');
+  var periods = [
+    {val:'ไตรมาส 1', label:'ไตรมาส 1 (ต.ค. – ธ.ค.)'},
+    {val:'ไตรมาส 2', label:'ไตรมาส 2 (ม.ค. – มี.ค.)'},
+    {val:'ไตรมาส 3', label:'ไตรมาส 3 (เม.ย. – มิ.ย.)'},
+    {val:'ไตรมาส 4', label:'ไตรมาส 4 (ก.ค. – ก.ย.)'},
+    {val:'ดำเนินการตลอดปี', label:'ดำเนินการตลอดปี'},
+    {val:'อื่นๆ', label:'อื่นๆ'}
+  ];
+  periods.forEach(function(p) {
+    var el = document.createElement('div');
+    el.className = 'opt-item';
+    el.setAttribute('data-val', p.val);
+    el.innerHTML = '<div class="chk-box"></div><span class="opt-txt">' + p.label + '</span>';
+    el.addEventListener('click', function() {
+      el.classList.toggle('on');
+      var idx = checkState.q8.indexOf(p.val);
+      if(idx === -1) checkState.q8.push(p.val);
+      else checkState.q8.splice(idx, 1);
+      var ow = document.getElementById('ow_q8');
+      if(ow) ow.classList.toggle('show', checkState.q8.indexOf('อื่นๆ') !== -1);
+      document.getElementById('f8').classList.remove('err');
+    });
+    c.appendChild(el);
+  });
+}
+
+// ===== SEND TO GOOGLE SHEETS (Hidden Form POST — works from file://) =====
+function sendToSheet(rec) {
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    console.log('ยังไม่ได้ตั้ง APPS_SCRIPT_URL');
+    return;
+  }
+
+  showSendStatus('sending');
+
+  // สร้าง hidden iframe เพื่อรับ response
+  var iframeName = 'gs_iframe_' + Date.now();
+  var iframe = document.createElement('iframe');
+  iframe.name = iframeName;
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  // สร้าง hidden form POST ไปยัง Apps Script
+  var form = document.createElement('form');
+  form.method = 'POST';
+  form.action = APPS_SCRIPT_URL;
+  form.target = iframeName;
+  form.style.display = 'none';
+
+  var input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'payload';
+  input.value = JSON.stringify(rec);
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+
+  // timeout 20 วินาที
+  var timer = setTimeout(function() {
+    showSendStatus('timeout');
+    cleanup();
+  }, 20000);
+
+  function cleanup() {
+    clearTimeout(timer);
+    if (form.parentNode) form.parentNode.removeChild(form);
+    setTimeout(function() {
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    }, 1000);
+  }
+
+  // iframe load = Apps Script ตอบกลับแล้ว (redirect หลัง POST)
+  iframe.onload = function() {
+    cleanup();
+    // Apps Script POST redirect = success
+    showSendStatus('success');
+  };
+
+  form.submit();
+}
+
+function showSendStatus(status) {
+  var el = document.getElementById('sendStatus');
+  if (!el) return;
+  el.style.display = 'block';
+  if (status === 'sending') {
+    el.style.background = '#fff8e6';
+    el.style.borderColor = '#e8a020';
+    el.style.color = '#7a4e00';
+    el.innerHTML = '⏳ กำลังบันทึกข้อมูลไปยัง Google Sheets...';
+  } else if (status === 'success') {
+    el.style.background = '#e6f4ec';
+    el.style.borderColor = '#1a7a4a';
+    el.style.color = '#0f4a2a';
+    el.innerHTML = '✅ บันทึกข้อมูลลง Google Sheets เรียบร้อยแล้ว';
+  } else if (status === 'timeout') {
+    el.style.background = '#fff8e6';
+    el.style.borderColor = '#e8a020';
+    el.style.color = '#7a4e00';
+    el.innerHTML = '⚠️ ใช้เวลานานเกินไป — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบใน Google Sheets';
+  } else {
+    el.style.background = '#fdecea';
+    el.style.borderColor = '#c0392b';
+    el.style.color = '#7a1a10';
+    el.innerHTML = '❌ ไม่สามารถบันทึกลง Google Sheets ได้ — กรุณาตรวจสอบ Apps Script';
+  }
+}
+
+// ===== ADMIN MODAL =====
+var isAdmin = false;
+
+function initAdminModal() {
+  var bg = document.getElementById('adminModalBg');
+  var closeBtn = document.getElementById('adminModalClose');
+  var pinBtn = document.getElementById('adminPinBtn');
+  var pinInput = document.getElementById('adminPinInput');
+
+  closeBtn.addEventListener('click', function() {
+    bg.classList.remove('open');
+    pinInput.value = '';
+    document.getElementById('adminPinErr').classList.remove('show');
+  });
+
+  bg.addEventListener('click', function(e) {
+    if (e.target === bg) {
+      bg.classList.remove('open');
+      pinInput.value = '';
+      document.getElementById('adminPinErr').classList.remove('show');
+    }
+  });
+
+  pinBtn.addEventListener('click', function() { checkAdminPin(); });
+  pinInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkAdminPin();
+  });
+}
+
+function checkAdminPin() {
+  var pin = document.getElementById('adminPinInput').value;
+  var errEl = document.getElementById('adminPinErr');
+  if (pin === 'cmpeo2569') {
+    isAdmin = true;
+    document.getElementById('adminModalBg').classList.remove('open');
+    document.getElementById('adminPinInput').value = '';
+    errEl.classList.remove('show');
+    // Show Excel button and update user indicator
+    showExcelBtn();
+    exportExcel();
+  } else {
+    errEl.classList.add('show');
+    document.getElementById('adminPinInput').value = '';
+    document.getElementById('adminPinInput').focus();
+  }
+}
+
+function showExcelBtn() {
+  var c = document.getElementById('dashActions');
+  if (!c) return;
+  c.innerHTML = '<button class="btn-dl" id="xlsBtn">📥 ดาวน์โหลด Excel (Admin)</button>';
+  document.getElementById('xlsBtn').addEventListener('click', function() {
+    exportExcel();
+  });
+}
+
+function requestExcel() {
+  if (isAdmin) {
+    exportExcel();
+  } else {
+    document.getElementById('adminPinInput').value = '';
+    document.getElementById('adminPinErr').classList.remove('show');
+    document.getElementById('adminModalBg').classList.add('open');
+    setTimeout(function() {
+      document.getElementById('adminPinInput').focus();
+    }, 100);
+  }
+}
+
+// ===== INIT =====
+buildOrgList();
+buildBudgetList();
+buildPeriodList();
+buildTargetList();
+buildStrategy();
+initAdminModal();
+
+</script>
+</body>
+</html>

@@ -466,6 +466,7 @@ tr:hover td{background:#f5f9ff}
         <option>โรงเรียนนำร่อง</option>
         <option>สำนักงานเขตพื้นที่การศึกษาประถมศึกษา</option>
         <option>สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา</option>
+        <option>อื่นๆ</option>
       </select>
     </div>
     <div class="tbl-wrap">
@@ -942,7 +943,53 @@ function showTab(tab) {
   document.querySelectorAll('.top-nav button').forEach(function(b,i){
     b.classList.toggle('active',(i===0&&tab==='form')||(i===1&&tab==='dash'));
   });
-  if(tab==='dash') renderDash();
+  if(tab==='dash') loadFromSheet();
+}
+
+// ===== LOAD FROM GOOGLE SHEETS (JSONP) =====
+function loadFromSheet() {
+  // show loading state
+  document.getElementById('kpiGrid').innerHTML =
+    '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted);font-size:14px">⏳ กำลังโหลดข้อมูลจาก Google Sheets...</div>';
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_WEB_APP_URL_HERE') {
+    renderDash();
+    return;
+  }
+
+  var cbName = 'gs_load_' + Date.now();
+  var url = APPS_SCRIPT_URL + '?callback=' + cbName + '&action=getAll';
+
+  var timer = setTimeout(function() {
+    if (window[cbName]) {
+      delete window[cbName];
+      var s = document.getElementById('gs_load_tag');
+      if (s) s.parentNode.removeChild(s);
+      // timeout — render with local records only
+      renderDash();
+    }
+  }, 10000);
+
+  window[cbName] = function(response) {
+    clearTimeout(timer);
+    delete window[cbName];
+    var s = document.getElementById('gs_load_tag');
+    if (s) s.parentNode.removeChild(s);
+    if (response && response.status === 'success' && response.data) {
+      records = response.data;
+    }
+    renderDash();
+  };
+
+  var script = document.createElement('script');
+  script.id = 'gs_load_tag';
+  script.src = url;
+  script.onerror = function() {
+    clearTimeout(timer);
+    delete window[cbName];
+    renderDash(); // fallback to local
+  };
+  document.head.appendChild(script);
 }
 
 // ===== DASHBOARD =====

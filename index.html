@@ -1066,10 +1066,17 @@ function closeModal(){ document.getElementById('modalBg').classList.remove('open
 function buildOrgList() {
   var c = document.getElementById('orgTypeList');
   var orgs = [
-    {val:'โรงเรียนนำร่อง', other:false},
-    {val:'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา', other:false},
-    {val:'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา', other:false},
-    {val:'อื่นๆ', other:true}
+    {val:'สพป.เชียงใหม่ เขต 1', other:false},
+    {val:'สพป.เชียงใหม่ เขต 2', other:false},
+    {val:'สพป.เชียงใหม่ เขต 3', other:false},
+    {val:'สพป.เชียงใหม่ เขต 4', other:false},
+    {val:'สพป.เชียงใหม่ เขต 5', other:false},
+    {val:'สพป.เชียงใหม่ เขต 6', other:false},
+    {val:'สพม.เชียงใหม่', other:false},
+    {val:'สำนักงานคณะกรรมการการศึกษาเอกชน', other:false},
+    {val:'การศึกษาพิเศษ', other:false},
+    {val:'เทศบาลนครเชียงใหม่', other:false},
+    {val:'อบจ.', other:false},
   ];
   orgs.forEach(function(o) {
     var el = document.createElement('div');

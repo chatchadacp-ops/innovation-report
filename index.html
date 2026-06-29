@@ -463,9 +463,17 @@ tr:hover td{background:#f5f9ff}
       <input type="text" id="searchBox" placeholder="🔍 ค้นหาโครงการ / หน่วยงาน..." oninput="renderTable()">
       <select id="filterOrg" onchange="renderTable()">
         <option value="">— ทุกประเภทหน่วยงาน —</option>
-        <option>โรงเรียนนำร่อง</option>
-        <option>สำนักงานเขตพื้นที่การศึกษาประถมศึกษา</option>
-        <option>สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา</option>
+        <option>สพป.เชียงใหม่ เขต 1</option>
+        <option>สพป.เชียงใหม่ เขต 2</option>
+        <option>สพป.เชียงใหม่ เขต 3</option>
+        <option>สพป.เชียงใหม่ เขต 4</option>
+        <option>สพป.เชียงใหม่ เขต 5</option>
+        <option>สพป.เชียงใหม่ เขต 6</option>
+        <option>สพม.เชียงใหม่</option>
+        <option>โรงเรียนเอกชน (สช.)</option>
+        <option>การศึกษาพิเศษ</option>
+        <option>อบจ.</option>
+        <option>เทศบาลนครเชียงใหม่</option>
         <option>อื่นๆ</option>
       </select>
     </div>
@@ -1042,9 +1050,17 @@ function rebuildFilterOptions() {
   var types = {};
   records.forEach(function(r){ if(r.orgType) types[r.orgType] = true; });
   var order = [
-    'โรงเรียนนำร่อง',
-    'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา',
-    'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา',
+    'สพป.เชียงใหม่ เขต 1',
+    'สพป.เชียงใหม่ เขต 2',
+    'สพป.เชียงใหม่ เขต 3',
+    'สพป.เชียงใหม่ เขต 4',
+    'สพป.เชียงใหม่ เขต 5',
+    'สพป.เชียงใหม่ เขต 6',
+    'สพม.เชียงใหม่',
+    'โรงเรียนเอกชน (สช.)',
+    'การศึกษาพิเศษ',
+    'อบจ.',
+    'เทศบาลนครเชียงใหม่',
     'อื่นๆ'
   ];
   Object.keys(types).forEach(function(t){
@@ -1094,9 +1110,7 @@ function renderTable() {
   }
   tbody.innerHTML = filtered.map(function(r,i){
     var orgShort = r.orgType;
-    if(orgShort === 'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา') orgShort = 'สพป.';
-    else if(orgShort === 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา') orgShort = 'สพม.';
-    else if(orgShort === 'โรงเรียนนำร่อง') orgShort = 'รร.นำร่อง';
+    if(orgShort && orgShort.length > 16) orgShort = orgShort.substring(0,14) + '…';
     return '<tr>' +
       '<td style="font-family:\'IBM Plex Mono\',monospace;color:var(--muted);text-align:center">' + (i+1) + '</td>' +
       '<td>' + r.orgName + '</td>' +
@@ -1145,9 +1159,17 @@ function closeModal(){ document.getElementById('modalBg').classList.remove('open
 function buildOrgList() {
   var c = document.getElementById('orgTypeList');
   var orgs = [
-    {val:'โรงเรียนนำร่อง', other:false},
-    {val:'สำนักงานเขตพื้นที่การศึกษาประถมศึกษา', other:false},
-    {val:'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษา', other:false},
+    {val:'สพป.เชียงใหม่ เขต 1', other:false},
+    {val:'สพป.เชียงใหม่ เขต 2', other:false},
+    {val:'สพป.เชียงใหม่ เขต 3', other:false},
+    {val:'สพป.เชียงใหม่ เขต 4', other:false},
+    {val:'สพป.เชียงใหม่ เขต 5', other:false},
+    {val:'สพป.เชียงใหม่ เขต 6', other:false},
+    {val:'สพม.เชียงใหม่', other:false},
+    {val:'โรงเรียนเอกชน (สช.)', other:false},
+    {val:'การศึกษาพิเศษ', other:false},
+    {val:'อบจ.', other:false},
+    {val:'เทศบาลนครเชียงใหม่', other:false},
     {val:'อื่นๆ', other:true}
   ];
   orgs.forEach(function(o) {
